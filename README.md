@@ -24,6 +24,14 @@ docker run \
 2. Run the `build_docker.sh` (this builds and pushes a Docker image).
 3. Use an example from `crontab.txt` to set up a regular job on a Linux machine.
 
+## Set up development environment.
+
+1. Install Python 3.10 and Poetry (`brew install poetry` if on macOS or as [written here](https://python-poetry.org/docs/#installation))
+2. Create a virtual environment `python -m venv venv`
+3. Activate the environment `source venv/bin/activate`
+4. Install the dependencies `poetry install --no-root`
+5. Have fun!
+
 ## Format the code
 
 ```bash
