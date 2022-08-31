@@ -1,3 +1,3 @@
 # nano /etc/crontab
 
-20 * * * * docker run -v /opt/otodom-data:/opt/data ivanychev/otodom:0.2 python -m otodom --bot-token=5670364148:AAHQjG5xM_39m5e93P_g0La10DmORoxhVIw >> /opt/otodom.log 2>> /opt/otodom.err
+20 * * * * docker run -v /opt/otodom-data:/opt/data ivanychev/otodom:0.3 python -m otodom --bot-token=5670364148:AAHQjG5xM_39m5e93P_g0La10DmORoxhVIw >> /opt/otodom.log 2>> /opt/otodom.err

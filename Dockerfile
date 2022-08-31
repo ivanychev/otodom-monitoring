@@ -16,6 +16,6 @@ ADD poetry.lock pyproject.toml /opt/
 WORKDIR /opt
 
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-root --no-dev && \
+    poetry install --no-root --only main && \
     rm -rf ~/.cache/pypoetry/{cache,artifacts} && \
     rm -rf /opt/poetry
