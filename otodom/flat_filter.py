@@ -33,12 +33,12 @@ class FlatFilter:
         self.price_min = price_min
         return self
 
-    def with_min_area(self, area_max: int) -> Self:
-        self.area_max = area_max
+    def with_min_area(self, area_min: int) -> Self:
+        self.area_min = area_min
         return self
 
-    def with_max_area(self, area_min: int) -> Self:
-        self.area_min = area_min
+    def with_max_area(self, area_max: int) -> Self:
+        self.area_max = area_max
         return self
 
     def with_page(self, page_idx: int) -> Self:
