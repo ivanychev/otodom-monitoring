@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# pycharm
+.idea/
+
+# VSCode
+.vscode/
+
+# Mac OS .DSStore
+.DS_Store
+
+# data
+/data/
+!/data/.keep
+
+# Testing related files
+.pytest_cache/
+.cache/
+
+# python bytecode
+*.pyc
+
+# virtual environments
+venv/
+
+# logs
+*.log
+log
+!log/.keep
+
+# .hypothesis database
+.hypothesis/
+data_pipeline_worker/.hypothesis/
+
+.env
+
+# pyenv's local python version
+.python-version
+
+
+data_pipeline_worker/dev_pusher/.dev/*
+!data_pipeline_worker/dev_pusher/.dev/run_task.py
+!data_pipeline_worker/dev_pusher/.dev/settings-example.yaml
+!data_pipeline_worker/dev_pusher/.dev/.databricks-connect-example
+!data_pipeline_worker/dev_pusher/.dev/jupyter-kernel.json
+
+pyrightconfig.json
