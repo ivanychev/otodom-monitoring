@@ -6,6 +6,7 @@ import click
 from loguru import logger
 from telegram import Bot
 from toolz import unique
+import tqdm
 
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FlatFilter
@@ -72,13 +73,18 @@ def fetch(data_path: str, bot_token: str, send_report: bool):
 def load_from_wal(data_path: str):
     data_path = pathlib.Path(data_path).absolute()
     storage_context = init_storage(data_path)
-    flats = [
-        flat
-        for fetched in storage_context.raw_json_path.rglob("fetched_*")
-        for flat in FlatList.parse_file(fetched).flats
-    ]
-    unique_flats = unique(flats, key=attrgetter("url"))
-    new_flats = filter_new_flats(storage_context.sqlite_conn, unique_flats)
+    fetched_files = list(storage_context.raw_json_path.rglob("fetched_*"))
+    logger.info("Found {} fetched JSON files", len(fetched_files))
+
+    url_to_flat = {}
+    for fetched_file_path in tqdm.tqdm(fetched_files):
+        for flat in FlatList.parse_file(fetched_file_path).flats:
+            url_to_flat[flat.url] = flat
+
+    flats = list(url_to_flat.values())
+    logger.info("Found {} logged flats", len(flats))
+
+    new_flats = filter_new_flats(storage_context.sqlite_conn, flats)
     insert_flats(storage_context.sqlite_conn, new_flats)
 
 
