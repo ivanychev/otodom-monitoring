@@ -1,90 +1,62 @@
+import base64
+import json
 import re
 from datetime import datetime
+from operator import itemgetter
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from loguru import logger
+from toolz import concat, unique
 from typing_extensions import Self
 
-from otodom.constants import BASE_URL
 from otodom.models import Flat
 
 PRICE_RE = re.compile(r"([0-9 ]+)\szł/mc")
 
 
 class OtodomFlatsPageParser:
-    def __init__(self, soup: BeautifulSoup, now: datetime):
+    def __init__(self, soup: BeautifulSoup, now: datetime, html: str):
         self.soup = soup
         self.now = now
+        self.html = html
 
     @classmethod
     def from_html(cls, html: str, now: datetime) -> Self:
         soup = BeautifulSoup(html, "html.parser")
-        return cls(soup=soup, now=now)
+        return cls(soup=soup, now=now, html=html)
 
     def is_empty(self) -> bool:
         return bool(self.soup.find_all(attrs={"data-cy": "no-search-results"}))
 
     def parse(self) -> list[Flat]:
-        cards = self.soup.find_all(attrs={"data-cy": "listing-item-link"})
-        return [self._parse_card(card) for card in cards]
-
-    def get_card(self, html: str, index: int) -> Tag:
-        soup = BeautifulSoup(html, "html.parser")
-        cards = soup.find_all(attrs={"data-cy": "listing-item-link"})
-        return cards[index]
-
-    def _parse_card(self, card: Tag) -> Flat:
-        return Flat(
-            url=urljoin(BASE_URL, card.attrs["href"]),
-            found_ts=self.now,
-            picture_url=self._parse_image_url(card),
-            summary_location=self._parse_summary_location(card),
-            title=self._parse_title(card),
-            price=self._parse_price(card),
-        )
-
-    def _parse_price(self, card: Tag) -> int | None:
-        try:
-            raw_price = (
-                card.find_all("article")[0].findChildren("div", recursive=False)[1].text
+        data = self.soup.find_all(attrs={"id": "__NEXT_DATA__"})
+        if not data:
+            raise RuntimeError(
+                f"Failed to fetch data from from html: base64 {base64.b64encode(self.html.encode('utf8'))}"
             )
-            raw_price = PRICE_RE.findall(raw_price)[0]
-            raw_price = re.sub(r"\s", "", raw_price)
-            return int(raw_price)
-        except IndexError as e:
-            logger.exception(
-                "Failed to parse price, raw_price: {} , card: {}", raw_price, card
-            )
-            return None
-        except Exception as e:
-            logger.exception("Failed to parse price, card: {}", card)
-            return None
+        payload: dict = json.loads(data[0].text)
 
-    def _parse_image_url(self, card: Tag) -> str | None:
-        try:
-            return str(card.find_all("picture")[0].find_all("source")[0]["srcset"])
-        except Exception as e:
-            logger.exception("Failed to parse picture, card: {}", card)
-            return None
-
-    def _parse_title(self, card: Tag) -> str | None:
-        try:
-            return str(
-                card.find_all("article")[0].findChildren("div", recursive=False)[0].text
-            )
-        except Exception as e:
-            logger.exception("Failed to parse title, card: {}", card)
-            return None
-
-    def _parse_summary_location(self, card: Tag) -> str | None:
-        try:
-            return str(
-                card.find_all("article")[0].findChildren("p", recursive=False)[0][
-                    "title"
+        items = unique(
+            concat(
+                [
+                    payload["props"]["pageProps"]["data"]["searchAds"]["items"],
+                    payload["props"]["pageProps"]["data"]["searchAdsRandomPromoted"][
+                        "items"
+                    ],
                 ]
+            ),
+            key=itemgetter("id"),
+        )
+        return [
+            Flat(
+                url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
+                found_ts=self.now,
+                title=item["title"],
+                picture_url=item["images"][0]["small"],
+                summary_location=item["locationLabel"]["value"],
+                price=item["totalPrice"]["value"],
             )
-        except Exception as e:
-            logger.exception("Failed to parse location, card: {}", card)
-            return None
+            for item in items
+        ]

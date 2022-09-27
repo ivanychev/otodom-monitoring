@@ -1,13 +1,15 @@
 import pathlib
 from datetime import datetime
+from operator import attrgetter
 
 import click
 from loguru import logger
 from telegram import Bot
+from toolz import unique
 
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FlatFilter
-from otodom.models import Flat
+from otodom.models import Flat, FlatList
 from otodom.report import _send_flat_summary, report_new_flats
 from otodom.storage import (
     dump_fetched_flats,
@@ -59,6 +61,25 @@ def fetch(data_path: str, bot_token: str, send_report: bool):
         report_new_flats(
             new_flats, total_flats, bot_token, now=ts, report_on_no_new_flats=False
         )
+
+
+@cli.command()
+@click.option(
+    "--data-path",
+    default=".",
+    help="The path to use to store SQLite DB and other data.",
+)
+def load_from_wal(data_path: str):
+    data_path = pathlib.Path(data_path).absolute()
+    storage_context = init_storage(data_path)
+    flats = [
+        flat
+        for fetched in storage_context.raw_json_path.rglob("fetched_*")
+        for flat in FlatList.parse_file(fetched).flats
+    ]
+    unique_flats = unique(flats, key=attrgetter("url"))
+    new_flats = filter_new_flats(storage_context.sqlite_conn, unique_flats)
+    insert_flats(storage_context.sqlite_conn, new_flats)
 
 
 @cli.command()

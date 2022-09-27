@@ -29,5 +29,10 @@ def parse_flats_for_filter(
         parser = OtodomFlatsPageParser.from_html(html, now=now)
         if parser.is_empty():
             break
+        parsed_flats = parser.parse()
+        if not parsed_flats:
+            raise RuntimeError(
+                "Looks like there's a next page but the parser failed to parse any flats"
+            )
         flats.extend(parser.parse())
     return list(unique(flats, attrgetter("url")))
