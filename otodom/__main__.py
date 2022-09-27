@@ -41,9 +41,9 @@ def fetch(data_path: str, bot_token: str, send_report: bool):
         FlatFilter()
         .with_internet()
         .with_air_conditioning()
-        .with_max_price(6000)
-        .with_min_area(38)
-        .with_minimum_build_year(2010),
+        .with_max_price(6500)
+        .with_min_area(35)
+        .with_minimum_build_year(2008),
         now=ts,
     )
     dump_fetched_flats(flats, storage_context, now=ts)

@@ -10,7 +10,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN curl -sSL https://install.python-poetry.org  | POETRY_VERSION=1.2.0 python3 -
 
-ADD otodom /opt/otodom
 ADD poetry.lock pyproject.toml /opt/
 
 WORKDIR /opt
@@ -19,3 +18,5 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-root --only main && \
     rm -rf ~/.cache/pypoetry/{cache,artifacts} && \
     rm -rf /opt/poetry
+
+ADD otodom /opt/otodom
