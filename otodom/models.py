@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from otodom.util import dt_to_naive_utc
+
 
 class Flat(BaseModel):
     url: str
@@ -15,7 +17,7 @@ class Flat(BaseModel):
 
     @property
     def updated_ts(self):
-        return self.pushed_up_dt or self.created_dt
+        return dt_to_naive_utc(self.pushed_up_dt or self.created_dt)
 
 
 class FlatList(BaseModel):

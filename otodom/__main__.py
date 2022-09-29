@@ -8,10 +8,10 @@ import timeago
 import tqdm
 from loguru import logger
 from telegram import Bot
-from toolz import unique
 
+from otodom.fetch import fetch_and_persist_flats
 from otodom.filter_parser import parse_flats_for_filter
-from otodom.flat_filter import FlatFilter
+from otodom.flat_filter import FILTERS, FlatFilter
 from otodom.models import Flat, FlatList
 from otodom.report import _send_flat_summary, report_new_flats
 from otodom.storage import (
@@ -21,6 +21,7 @@ from otodom.storage import (
     get_total_flats_in_db,
     init_storage,
     insert_flats,
+    update_flats,
 )
 
 
@@ -37,40 +38,37 @@ def cli():
 )
 @click.option("--bot-token", required=True, help="The Telegram bot token to use.")
 @click.option("--send-report", default=True, help="Send report to the Channel.")
-def fetch(data_path: str, bot_token: str, send_report: bool):
-    logger.info("Hey there!")
+@click.option("--mode", default="dev", help="Run mode.")
+def fetch(data_path: str, bot_token: str, send_report: bool, mode: str):
+    logger.info("Hey there, Zabka reporting!")
     data_path = pathlib.Path(data_path).absolute()
     storage_context = init_storage(data_path)
     ts = datetime.now()
-    flats = parse_flats_for_filter(
-        FlatFilter()
-        .with_internet()
-        .with_air_conditioning()
-        .with_max_price(6500)
-        .with_min_area(35)
-        .with_minimum_build_year(2008),
-        now=ts,
-    )
-    dump_fetched_flats(flats, storage_context, now=ts)
-    logger.info("Fetched {} flats", len(flats))
-    new_flats = filter_new_flats(storage_context.sqlite_conn, flats)
-    logger.info("Found {} new flats", len(new_flats))
-    dump_new_flats(new_flats, storage_context, now=ts)
 
-    insert_flats(storage_context.sqlite_conn, new_flats)
-    total_flats = get_total_flats_in_db(storage_context.sqlite_conn)
-
-    if send_report:
-        report_new_flats(
-            new_flats, total_flats, bot_token, now=ts, report_on_no_new_flats=False
+    for flat_filter in FILTERS.values():
+        logger.info("Executing with {} filter", flat_filter.name)
+        fetched = fetch_and_persist_flats(
+            storage_context=storage_context, ts=ts, flat_filter=flat_filter
         )
+
+        if send_report:
+            report_new_flats(
+                filter_name=flat_filter.name,
+                new_flats=fetched.new_flats,
+                updated_flats=fetched.update_flats,
+                total_flats=fetched.total_flats,
+                bot_token=bot_token,
+                now=ts,
+                report_on_no_new_flats=False,
+                mode=mode,
+            )
 
 
 @cli.command()
 def print_flats():
     ts = datetime.now().replace(tzinfo=pytz.timezone("Europe/Warsaw"))
     flats = parse_flats_for_filter(
-        FlatFilter()
+        FlatFilter("warsaw")
         # .with_internet()
         .in_muranow()
         .with_air_conditioning()

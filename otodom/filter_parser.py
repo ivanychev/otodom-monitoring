@@ -2,15 +2,23 @@ from datetime import datetime
 from operator import attrgetter
 from time import sleep
 
+import requests as r
 from loguru import logger
 from toolz.itertoolz import unique
 
-from otodom.fetch import fetch_listing_html
+from otodom.constants import USER_AGENT
 from otodom.flat_filter import FlatFilter
 from otodom.listing_page_parser import OtodomFlatsPageParser
 from otodom.models import Flat
 
 PAGE_HARD_LIMIT = 100
+
+
+def fetch_listing_html(url: str) -> str:
+    headers = {"User-Agent": USER_AGENT}
+    resp = r.get(url, headers=headers)
+    resp.raise_for_status()
+    return resp.text
 
 
 def parse_flats_for_filter(

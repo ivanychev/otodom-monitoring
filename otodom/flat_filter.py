@@ -7,7 +7,8 @@ from typing_extensions import Self
 class FlatFilter:
     """This class describes flat filters and transforms it to URL."""
 
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.extras = set()
         self.media = set()
         self.page = None
@@ -99,3 +100,26 @@ class FlatFilter:
             url.args["areaMax"] = self.area_max
 
         return str(url)
+
+
+def _specify_common_conditions(f: FlatFilter) -> FlatFilter:
+    return (
+        f.with_internet()
+        .with_air_conditioning()
+        .with_max_price(6500)
+        .with_min_area(40)
+        .with_minimum_build_year(2008)
+    )
+
+
+FILTERS = {
+    "warsaw": (_specify_common_conditions(FlatFilter("warsaw"))),
+    "wola": (_specify_common_conditions(FlatFilter("wola").in_wola())),
+    "muranow": (_specify_common_conditions(FlatFilter("muranow").in_muranow())),
+    "sluzewiec": (_specify_common_conditions(FlatFilter("sluzewiec").in_sluzewiec())),
+    "sady_zoliborskie": (
+        _specify_common_conditions(FlatFilter("sady_zoliborskie").in_sady_zoliborskie())
+    ),
+}
+
+assert all(f.name == name for name, f in FILTERS.items())
