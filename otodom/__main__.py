@@ -1,12 +1,14 @@
 import pathlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from operator import attrgetter
 
 import click
+import pytz
+import timeago
+import tqdm
 from loguru import logger
 from telegram import Bot
 from toolz import unique
-import tqdm
 
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FlatFilter
@@ -62,6 +64,26 @@ def fetch(data_path: str, bot_token: str, send_report: bool):
         report_new_flats(
             new_flats, total_flats, bot_token, now=ts, report_on_no_new_flats=False
         )
+
+
+@cli.command()
+def print_flats():
+    ts = datetime.now().replace(tzinfo=pytz.timezone("Europe/Warsaw"))
+    flats = parse_flats_for_filter(
+        FlatFilter()
+        # .with_internet()
+        .in_muranow()
+        .with_air_conditioning()
+        .with_max_price(6500)
+        .with_min_area(40)
+        .with_minimum_build_year(2008),
+        now=ts,
+    )
+
+    flats.sort(key=attrgetter("updated_ts"), reverse=True)
+    for flat in flats:
+        if flat.updated_ts >= (ts - timedelta(days=30)):
+            print(f"{timeago.format(flat.updated_ts, ts)} {flat.url}")
 
 
 @cli.command()

@@ -5,15 +5,19 @@ from datetime import datetime
 from operator import itemgetter
 from urllib.parse import urljoin
 
+import pytz
 from bs4 import BeautifulSoup
-from bs4.element import Tag
-from loguru import logger
 from toolz import concat, unique
 from typing_extensions import Self
 
 from otodom.models import Flat
 
 PRICE_RE = re.compile(r"([0-9 ]+)\szł/mc")
+
+
+def _make_tz_aware(dt: datetime) -> datetime:
+    tz = pytz.timezone("Europe/Warsaw")
+    return dt.replace(tzinfo=tz)
 
 
 class OtodomFlatsPageParser:
@@ -57,6 +61,10 @@ class OtodomFlatsPageParser:
                 picture_url=item["images"][0]["small"],
                 summary_location=item["locationLabel"]["value"],
                 price=item["totalPrice"]["value"],
+                created_dt=_make_tz_aware(datetime.fromisoformat(item["dateCreated"])),
+                pushed_up_dt=datetime.fromisoformat(item["pushedUpAt"])
+                if item["pushedUpAt"]
+                else None,
             )
             for item in items
         ]

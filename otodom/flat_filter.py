@@ -16,6 +16,7 @@ class FlatFilter:
         self.price_min = None
         self.area_max = None
         self.area_min = None
+        self.locations = "[cities_6-26]"
 
     def with_air_conditioning(self) -> Self:
         self.extras.add("AIR_CONDITIONING")
@@ -49,8 +50,28 @@ class FlatFilter:
         self.min_built_year = year
         return self
 
+    def in_wola(self):
+        self.locations = "[districts_6-117]"
+        return self
+
+    def in_mokotow(self):
+        self.locations = "[districts_6-39]"
+        return self
+
+    def in_sluzewiec(self):
+        self.locations = "[districts_6-7548]"
+        return self
+
+    def in_sady_zoliborskie(self):
+        self.locations = "[districts_6-9215]"
+        return self
+
+    def in_muranow(self):
+        self.locations = "[districts_6-961]"
+        return self
+
     def compose_url(self):
-        url = furl("https://www.otodom.pl/pl/oferty/wynajem/mieszkanie/warszawa")
+        url = furl(f"https://www.otodom.pl/pl/oferty/wynajem/mieszkanie/warszawa")
         extras = "[" + ",".join(self.extras) + "]"
         media = "[" + ",".join(self.media) + "]"
 
@@ -58,7 +79,7 @@ class FlatFilter:
         url.args["limit"] = 36
         url.args["market"] = "ALL"
         url.args["ownerTypeSingleSelect"] = "ALL"
-        url.args["locations"] = "[cities_6-26]"
+        url.args["locations"] = self.locations
         url.args["viewType"] = "listing"
         url.args["lang"] = "pl"
         url.args["extras"] = extras
