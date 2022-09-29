@@ -67,7 +67,7 @@ def report_new_flats(
     summary_report = f"Found {len(new_flats)} new flats, {len(updated_flats)} updated flats for filter <code>{filter_name}</code> at {now.isoformat()}, total flats: {total_flats}"
     logger.info(summary_report)
 
-    if (not new_flats and not updated_flats) or report_on_no_new_flats:
+    if (new_flats or updated_flats) or report_on_no_new_flats:
         bot.send_message(
             get_channel_id(mode),
             summary_report,
