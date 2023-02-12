@@ -102,25 +102,18 @@ class FlatFilter:
         return str(url)
 
 
-def _specify_common_conditions(f: FlatFilter) -> FlatFilter:
+def _specify_common_conditions_no_conditioner(f: FlatFilter) -> FlatFilter:
     return (
         f.with_internet()
-        .with_air_conditioning()
-        .with_max_price(4000)
+        .with_max_price(4200)
         .with_min_area(40)
         .with_minimum_build_year(2008)
     )
 
 
 FILTERS = {
-    # "warsaw": (_specify_common_conditions(FlatFilter("warsaw"))),
-    "wola": (_specify_common_conditions(FlatFilter("wola").in_wola())),
-    "mokotow": (_specify_common_conditions(FlatFilter("mokotow").in_mokotow())),
-    # "muranow": (_specify_common_conditions(FlatFilter("muranow").in_muranow())),
-    # "sluzewiec": (_specify_common_conditions(FlatFilter("sluzewiec").in_sluzewiec())),
-    # "sady_zoliborskie": (
-    #     _specify_common_conditions(FlatFilter("sady_zoliborskie").in_sady_zoliborskie())
-    # ),
+    "wola_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("wola").in_wola())),
+    "mokotow_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("mokotow").in_mokotow())),
 }
 
 assert all(f.name == name for name, f in FILTERS.items())

@@ -1,5 +1,5 @@
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime
 from operator import attrgetter
 
 import click
@@ -15,13 +15,9 @@ from otodom.flat_filter import FILTERS, FlatFilter
 from otodom.models import Flat, FlatList
 from otodom.report import _send_flat_summary, report_new_flats
 from otodom.storage import (
-    dump_fetched_flats,
-    dump_new_flats,
     filter_new_flats,
-    get_total_flats_in_db,
     init_storage,
     insert_flats,
-    update_flats,
 )
 
 
@@ -79,9 +75,9 @@ def print_flats():
     )
 
     flats.sort(key=attrgetter("updated_ts"), reverse=True)
+    logger.info("Fetched {} flats", len(flats))
     for flat in flats:
-        if flat.updated_ts >= (ts - timedelta(days=30)):
-            print(f"{timeago.format(flat.updated_ts, ts)} {flat.url}")
+        print(f"{timeago.format(flat.updated_ts, ts)} {flat.url}")
 
 
 @cli.command()
