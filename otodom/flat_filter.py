@@ -112,8 +112,8 @@ def _specify_common_conditions_no_conditioner(f: FlatFilter) -> FlatFilter:
 
 
 FILTERS = {
-    "wola_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("wola").in_wola())),
-    "mokotow_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("mokotow").in_mokotow())),
+    "wola_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("wola_no_conditioner").in_wola())),
+    "mokotow_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("mokotow_no_conditioner").in_mokotow())),
 }
 
 assert all(f.name == name for name, f in FILTERS.items())
