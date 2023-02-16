@@ -4,7 +4,7 @@ set -euxo pipefail
 export DOCKER_BUILDKIT=1
 
 docker_image=ivanychev/otodom
-docker_tag=0.13
+docker_tag=0.14
 
 # Install emulators for all CPU architectures.
 docker run --privileged --rm tonistiigi/binfmt --install all

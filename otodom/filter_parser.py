@@ -1,8 +1,10 @@
+import json
 from datetime import datetime
 from operator import attrgetter
 from time import sleep
 
 import requests as r
+from bs4 import BeautifulSoup
 from loguru import logger
 from toolz.itertoolz import unique
 
@@ -21,20 +23,31 @@ def fetch_listing_html(url: str) -> str:
     return resp.text
 
 
+def _infer_page_count(filter: FlatFilter) -> int:
+    url = filter.with_page(1).compose_url()
+    logger.info("Inferring page count from url: {}", url)
+    html = fetch_listing_html(url)
+    soup = BeautifulSoup(html, "html.parser")
+
+    data = json.loads(soup.find_all(attrs={"id": "__NEXT_DATA__"})[0].text)
+    count = data["props"]["pageProps"]["data"]["searchAds"]["pagination"]["totalPages"]
+    return count
+
+
 def parse_flats_for_filter(
     filter: FlatFilter,
     now: datetime,
     sleep_for: int = 3,
 ) -> list[Flat]:
-    page_idx = 0
     flats = []
-    while True:
+    page_count = _infer_page_count(filter)
+    logger.info("Inferred that the page count is {}", page_count)
+    for page_idx in range(1, page_count + 1):
         sleep(sleep_for)
-        page_idx += 1
         url = filter.with_page(page_idx).compose_url()
         logger.info("Querying {}", url)
         html = fetch_listing_html(url)
-        parser = OtodomFlatsPageParser.from_html(html, now=now)
+        parser = OtodomFlatsPageParser.from_html(html, now=now, filter=filter)
         if parser.is_empty():
             break
         parsed_flats = parser.parse()

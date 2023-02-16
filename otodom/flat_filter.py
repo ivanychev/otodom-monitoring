@@ -85,7 +85,7 @@ class FlatFilter:
         url.args["lang"] = "pl"
         url.args["extras"] = extras
         url.args["media"] = media
-        url.args["searchingCriteria"] = ["wynajem", "mieszkanie", "cala-polska"]
+        url.args["searchingCriteria"] = ["wynajem", "mieszkanie"]
         if self.min_built_year:
             url.args["buildYearMin"] = self.min_built_year
         if self.page:
@@ -101,6 +101,10 @@ class FlatFilter:
 
         return str(url)
 
+    def matches_filter(self, item: dict) -> bool:
+        # return 'warszawa' in item.get('locationLabel', {}).get('value', '').lower()
+        return True
+
 
 def _specify_common_conditions_no_conditioner(f: FlatFilter) -> FlatFilter:
     return (
@@ -112,8 +116,16 @@ def _specify_common_conditions_no_conditioner(f: FlatFilter) -> FlatFilter:
 
 
 FILTERS = {
-    "wola_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("wola_no_conditioner").in_wola())),
-    "mokotow_no_conditioner": (_specify_common_conditions_no_conditioner(FlatFilter("mokotow_no_conditioner").in_mokotow())),
+    "wola_no_conditioner": (
+        _specify_common_conditions_no_conditioner(
+            FlatFilter("wola_no_conditioner").in_wola()
+        )
+    ),
+    "mokotow_no_conditioner": (
+        _specify_common_conditions_no_conditioner(
+            FlatFilter("mokotow_no_conditioner").in_mokotow()
+        )
+    ),
 }
 
 assert all(f.name == name for name, f in FILTERS.items())

@@ -14,11 +14,8 @@ from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, FlatFilter
 from otodom.models import Flat, FlatList
 from otodom.report import _send_flat_summary, report_new_flats
-from otodom.storage import (
-    filter_new_flats,
-    init_storage,
-    insert_flats,
-)
+from otodom.storage import filter_new_flats, init_storage, insert_flats
+from otodom.util import dt_to_naive_utc
 
 
 @click.group()
@@ -65,10 +62,10 @@ def print_flats():
     ts = datetime.now().replace(tzinfo=pytz.timezone("Europe/Warsaw"))
     flats = parse_flats_for_filter(
         FlatFilter("warsaw")
-        # .with_internet()
+        .with_internet()
         .in_muranow()
         .with_air_conditioning()
-        .with_max_price(6500)
+        .with_max_price(4000)
         .with_min_area(40)
         .with_minimum_build_year(2008),
         now=ts,
@@ -77,7 +74,11 @@ def print_flats():
     flats.sort(key=attrgetter("updated_ts"), reverse=True)
     logger.info("Fetched {} flats", len(flats))
     for flat in flats:
-        print(f"{timeago.format(flat.updated_ts, ts)} {flat.url}")
+        logger.info(
+            "{}, Flat url: {}",
+            timeago.format(flat.updated_ts, dt_to_naive_utc(ts)),
+            flat.url,
+        )
 
 
 @cli.command()

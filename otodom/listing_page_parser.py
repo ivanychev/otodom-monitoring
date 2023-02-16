@@ -7,9 +7,11 @@ from urllib.parse import urljoin
 
 import pytz
 from bs4 import BeautifulSoup
+from loguru import logger
 from toolz import concat, unique
 from typing_extensions import Self
 
+from otodom.flat_filter import FlatFilter
 from otodom.models import Flat
 
 PRICE_RE = re.compile(r"([0-9 ]+)\szł/mc")
@@ -21,15 +23,18 @@ def _make_tz_aware(dt: datetime) -> datetime:
 
 
 class OtodomFlatsPageParser:
-    def __init__(self, soup: BeautifulSoup, now: datetime, html: str):
+    def __init__(
+        self, soup: BeautifulSoup, now: datetime, html: str, filter: FlatFilter
+    ):
         self.soup = soup
         self.now = now
         self.html = html
+        self.filter = filter
 
     @classmethod
-    def from_html(cls, html: str, now: datetime) -> Self:
+    def from_html(cls, html: str, now: datetime, filter: FlatFilter) -> Self:
         soup = BeautifulSoup(html, "html.parser")
-        return cls(soup=soup, now=now, html=html)
+        return cls(soup=soup, now=now, html=html, filter=filter)
 
     def is_empty(self) -> bool:
         return bool(self.soup.find_all(attrs={"data-cy": "no-search-results"}))
@@ -42,6 +47,13 @@ class OtodomFlatsPageParser:
             )
         payload: dict = json.loads(data[0].text)
 
+        if "cala-polska" in payload["props"]["pageProps"]["canonicalURL"]:
+            logger.info(
+                "Otodom switched to searching across Poland instead of {}, so we exiting...",
+                self.filter,
+            )
+            return []
+
         items = unique(
             concat(
                 [
@@ -53,7 +65,7 @@ class OtodomFlatsPageParser:
             ),
             key=itemgetter("id"),
         )
-        return [
+        flats = [
             Flat(
                 url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
                 found_ts=self.now,
@@ -67,4 +79,6 @@ class OtodomFlatsPageParser:
                 else None,
             )
             for item in items
+            if self.filter.matches_filter(item)
         ]
+        return flats
