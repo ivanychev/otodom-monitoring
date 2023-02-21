@@ -129,7 +129,7 @@ FILTERS = {
     ),
     "ochota_no_conditioner": (
         _specify_common_conditions_no_conditioner(
-            FlatFilter("wola_no_conditioner").in_ochota()
+            FlatFilter("ochota_no_conditioner").in_ochota()
         )
     ),
     "mokotow_no_conditioner": (
