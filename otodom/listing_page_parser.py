@@ -9,7 +9,7 @@ import pytz
 from bs4 import BeautifulSoup
 from loguru import logger
 from toolz import concat, unique
-from typing_extensions import Self
+from typing import Self
 
 from otodom.flat_filter import FlatFilter
 from otodom.models import Flat

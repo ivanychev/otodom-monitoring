@@ -1,5 +1,5 @@
 from furl import furl
-from typing_extensions import Self
+from typing import Self
 
 # 'https://www.otodom.pl/pl/oferty/wynajem/mieszkanie/warszawa?distanceRadius=0&page=1&limit=36&market=ALL&ownerTypeSingleSelect=ALL&extras=[AIR_CONDITIONING]&media=[INTERNET]&buildYearMin=2010&locations=[cities_6-26]&viewType=listing&lang=pl&searchingCriteria=wynajem&searchingCriteria=mieszkanie&searchingCriteria=cala-polska'
 
@@ -18,6 +18,7 @@ class FlatFilter:
         self.area_max = None
         self.area_min = None
         self.locations = "[cities_6-26]"
+        self.search_suffix = "mieszkanie/warszawa"
 
     def with_air_conditioning(self) -> Self:
         self.extras.add("AIR_CONDITIONING")
@@ -63,6 +64,11 @@ class FlatFilter:
         self.locations = "[districts_6-7548]"
         return self
 
+    def in_ochota(self):
+        self.locations = "[districts_6-40]"
+        self.search_suffix = "mieszkanie/warszawa/ochota"
+        return self
+
     def in_sady_zoliborskie(self):
         self.locations = "[districts_6-9215]"
         return self
@@ -72,7 +78,7 @@ class FlatFilter:
         return self
 
     def compose_url(self):
-        url = furl(f"https://www.otodom.pl/pl/oferty/wynajem/mieszkanie/warszawa")
+        url = furl(f"https://www.otodom.pl/pl/oferty/wynajem") / self.search_suffix
         extras = "[" + ",".join(self.extras) + "]"
         media = "[" + ",".join(self.media) + "]"
 
@@ -109,7 +115,7 @@ class FlatFilter:
 def _specify_common_conditions_no_conditioner(f: FlatFilter) -> FlatFilter:
     return (
         f.with_internet()
-        .with_max_price(4200)
+        .with_max_price(4700)
         .with_min_area(40)
         .with_minimum_build_year(2008)
     )
@@ -119,6 +125,11 @@ FILTERS = {
     "wola_no_conditioner": (
         _specify_common_conditions_no_conditioner(
             FlatFilter("wola_no_conditioner").in_wola()
+        )
+    ),
+    "ochota_no_conditioner": (
+        _specify_common_conditions_no_conditioner(
+            FlatFilter("wola_no_conditioner").in_ochota()
         )
     ),
     "mokotow_no_conditioner": (
