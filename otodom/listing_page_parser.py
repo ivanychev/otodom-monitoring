@@ -70,7 +70,7 @@ class OtodomFlatsPageParser:
                 url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
                 found_ts=self.now,
                 title=item["title"],
-                picture_url=item["images"][0]["small"],
+                picture_url=item["images"][0]["small"] if item["images"] else None,
                 summary_location=item["locationLabel"]["value"],
                 price=item["totalPrice"]["value"],
                 created_dt=_make_tz_aware(datetime.fromisoformat(item["dateCreated"])),
