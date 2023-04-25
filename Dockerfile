@@ -12,8 +12,8 @@ ADD poetry.lock pyproject.toml /opt/
 
 WORKDIR /opt
 
-RUN python -c 'import urllib.request, sys; print(urllib.request.urlopen(f"{sys.argv[1]}").read().decode("utf8"))' \
-    https://install.python-poetry.org  | python3 - && \
+RUN python -c 'import urllib.request, sys; print(urllib.request.urlopen(f"{sys.argv[1]}").read().decode("utf8"))' https://install.python-poetry.org  \
+    | POETRY_VERSION=1.4.2 python3 - && \
     poetry config virtualenvs.create false && \
     poetry install --no-root --only main && \
     rm -rf ~/.cache/pypoetry/{cache,artifacts} && \

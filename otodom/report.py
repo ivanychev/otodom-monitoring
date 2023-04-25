@@ -1,10 +1,12 @@
 import textwrap
+import traceback
 from datetime import datetime
 
 import tenacity
 from loguru import logger
 from telegram import Bot, ParseMode
 from telegram.error import RetryAfter
+from telegram.utils.helpers import escape_markdown
 
 from otodom.models import Flat
 
@@ -51,6 +53,41 @@ def _send_flat_summary(bot: Bot, flat: Flat, mode: str, prefix: str = ""):
     )
     if flat.picture_url:
         bot.send_photo(get_channel_id(mode), flat.picture_url, timeout=1000)
+
+
+def report_message(bot_token: str, mode: str, message: str, escape: bool = False):
+    if escape:
+        message = escape_markdown(message, version=2)
+    bot = Bot(token=bot_token)
+    bot.send_message(
+        get_channel_id(mode),
+        message,
+        parse_mode=ParseMode.MARKDOWN_V2,
+    )
+
+
+def report_error(bot_token: str, mode: str, exception: Exception):
+    bot = Bot(token=bot_token)
+    tb = "".join(
+        traceback.format_exception(type(exception), exception, exception.__traceback__)
+    )
+    tb = escape_markdown(tb, version=2)
+    msg = textwrap.dedent(
+        f"""\
+Error occurred to the bot:
+
+```
+{tb}
+```
+
+Please check the server\\.
+"""
+    )
+    bot.send_message(
+        get_channel_id(mode),
+        msg,
+        parse_mode=ParseMode.MARKDOWN_V2,
+    )
 
 
 def report_new_flats(

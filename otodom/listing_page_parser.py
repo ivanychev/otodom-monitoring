@@ -3,13 +3,13 @@ import json
 import re
 from datetime import datetime
 from operator import itemgetter
+from typing import Self
 from urllib.parse import urljoin
 
 import pytz
 from bs4 import BeautifulSoup
 from loguru import logger
 from toolz import concat, unique
-from typing import Self
 
 from otodom.flat_filter import FlatFilter
 from otodom.models import Flat
@@ -70,7 +70,9 @@ class OtodomFlatsPageParser:
                 url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
                 found_ts=self.now,
                 title=item["title"],
-                picture_url=item["images"][0]["small"] if item["images"] else None,
+                picture_url=item["images"][0].get("medium")
+                or item["images"][0].get("large")
+                or None,
                 summary_location=item["locationLabel"]["value"],
                 price=item["totalPrice"]["value"],
                 created_dt=_make_tz_aware(datetime.fromisoformat(item["dateCreated"])),
