@@ -25,21 +25,23 @@ from otodom.storage import filter_new_flats, init_storage, insert_flats
 from otodom.util import dt_to_naive_utc
 
 
+def _report_on_launch(mode: str, bot_token: str):
+    now = datetime.now()
+    msg = "\n".join(
+        [
+            escape_markdown(
+                f"Hey there, Zabka reporting! Launching bot at {now.isoformat()}. Active filters:",
+                version=2,
+            )
+        ]
+        + [f.get_markdown_description(name) for name, f in FILTERS.items()]
+    )
+    logger.info(msg)
+    report_message(bot_token=bot_token, mode=mode, message=msg)
+
+
 def _fetch(data_path: str, bot_token: str, send_report: bool, mode: str):
     try:
-        now = datetime.now()
-        msg = "\n".join(
-            [
-                escape_markdown(
-                    f"Hey there, Zabka reporting! Launching bot at {now.isoformat()}. Active filters:",
-                    version=2,
-                )
-            ]
-            + [f.get_markdown_description(name) for name, f in FILTERS.items()]
-        )
-        logger.info(msg)
-        report_message(bot_token=bot_token, mode=mode, message=msg)
-
         data_path = pathlib.Path(data_path).absolute()
         storage_context = init_storage(data_path)
         ts = datetime.now()
@@ -81,6 +83,7 @@ def cli():
 @click.option("--send-report", default=True, help="Send report to the Channel.")
 @click.option("--mode", default="dev", help="Run mode.")
 def fetch(data_path: str, bot_token: str, send_report: bool, mode: str):
+    _report_on_launch(mode=mode, bot_token=bot_token)
     _fetch(data_path=data_path, bot_token=bot_token, send_report=send_report, mode=mode)
 
 
@@ -98,6 +101,7 @@ def fetch_every(
     data_path: str, bot_token: str, send_report: bool, mode: str, minutes: int
 ):
     logger.info("Scheduling fetch every {} minutes", minutes)
+    _report_on_launch(mode=mode, bot_token=bot_token)
     scheduler = BlockingScheduler()
     scheduler.add_job(
         _fetch,

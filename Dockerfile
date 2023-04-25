@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV POETRY_HOME=/opt/poetry
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV PATH="$POETRY_HOME/bin:$PATH"
+ENV LOGURU_COLORIZE=NO
 
 # Use bash
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

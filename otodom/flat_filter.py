@@ -57,7 +57,6 @@ class FlatFilter:
         return self
 
     def with_page(self, page_idx: int) -> Self:
-        self.description.append(f"With page: {page_idx}")
         self.page = page_idx
         return self
 
