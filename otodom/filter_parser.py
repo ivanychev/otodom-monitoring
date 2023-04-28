@@ -1,3 +1,4 @@
+import http
 import json
 from datetime import datetime
 from operator import attrgetter
@@ -6,6 +7,12 @@ from time import sleep
 import requests as r
 from bs4 import BeautifulSoup
 from loguru import logger
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 from toolz.itertoolz import unique
 
 from otodom.constants import USER_AGENT
@@ -16,9 +23,24 @@ from otodom.models import Flat
 PAGE_HARD_LIMIT = 100
 
 
+class RetryableError(Exception):
+    pass
+
+
+@retry(
+    retry=retry_if_exception_type(RetryableError),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(5),
+)
 def fetch_listing_html(url: str) -> str:
     headers = {"User-Agent": USER_AGENT}
     resp = r.get(url, headers=headers)
+    if resp.status_code in (
+        http.HTTPStatus.BAD_GATEWAY,
+        http.HTTPStatus.SERVICE_UNAVAILABLE,
+        http.HTTPStatus.GATEWAY_TIMEOUT,
+    ):
+        raise RetryableError()
     resp.raise_for_status()
     return resp.text
 
