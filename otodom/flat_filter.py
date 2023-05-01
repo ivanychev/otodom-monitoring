@@ -75,6 +75,11 @@ class FlatFilter:
         self.locations = "[districts_6-39]"
         return self
 
+    def in_ochota(self):
+        self.description.append(f"In Ochota")
+        self.locations = "[districts_6-40]"
+        return self
+
     def in_sluzewiec(self):
         self.description.append(f"In Sluzewiec")
         self.locations = "[districts_6-7548]"
@@ -136,13 +141,14 @@ def _specify_common_conditions(f: FlatFilter) -> FlatFilter:
 
 FILTERS = {
     # "warsaw": (_specify_common_conditions(FlatFilter("warsaw"))),
-    # "wola": (_specify_common_conditions(FlatFilter("wola").in_wola())),
+    "wola": (_specify_common_conditions(FlatFilter("wola").in_wola())),
     "mokotow": (_specify_common_conditions(FlatFilter("mokotow").in_mokotow())),
+    "ochota": (_specify_common_conditions(FlatFilter("ochota").in_ochota())),
     # "muranow": (_specify_common_conditions(FlatFilter("muranow").in_muranow())),
     # "sluzewiec": (_specify_common_conditions(FlatFilter("sluzewiec").in_sluzewiec())),
-    # "sady_zoliborskie": (
-    #     _specify_common_conditions(FlatFilter("sady_zoliborskie").in_sady_zoliborskie())
-    # ),
+    "sady_zoliborskie": (
+        _specify_common_conditions(FlatFilter("sady_zoliborskie").in_sady_zoliborskie())
+    ),
 }
 
 assert all(f.name == name for name, f in FILTERS.items())
