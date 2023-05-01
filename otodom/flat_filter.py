@@ -75,17 +75,13 @@ class FlatFilter:
         self.locations = "[districts_6-39]"
         return self
 
-    def in_ochota(self):
-        self.description.append(f"In Ochota")
-        self.locations = "[districts_6-40]"
-        return self
-
     def in_sluzewiec(self):
         self.description.append(f"In Sluzewiec")
         self.locations = "[districts_6-7548]"
         return self
 
     def in_ochota(self):
+        self.description.append(f"In Ochota")
         self.locations = "[districts_6-40]"
         self.search_suffix = "mieszkanie/warszawa/ochota"
         return self
