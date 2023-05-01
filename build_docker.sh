@@ -17,5 +17,6 @@ docker buildx build \
      --platform linux/arm64/v8,linux/amd64 \
      -f Dockerfile \
      -t "${docker_image}:${docker_tag}" \
+     -t "${docker_image}:latest" \
      --push \
      .
