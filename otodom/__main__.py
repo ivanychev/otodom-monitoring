@@ -63,6 +63,7 @@ def _fetch(data_path: str, bot_token: str, send_report: bool, mode: str):
                     report_on_no_new_flats=False,
                     mode=mode,
                 )
+        logger.info("Fetch for all filters completed.")
     except Exception as e:
         report_error(bot_token=bot_token, mode=mode, exception=e)
         raise e
