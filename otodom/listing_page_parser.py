@@ -22,6 +22,17 @@ def _make_tz_aware(dt: datetime) -> datetime:
     return dt.replace(tzinfo=tz)
 
 
+def _extract_image_url(item: dict) -> str | None:
+    if not item.get("images"):
+        return None
+    return (
+        item["images"][0].get("medium")
+        or item["images"][0].get("large")
+        or item["images"][0].get("small")
+        or None
+    )
+
+
 class OtodomFlatsPageParser:
     def __init__(
         self, soup: BeautifulSoup, now: datetime, html: str, filter: FlatFilter
@@ -70,9 +81,7 @@ class OtodomFlatsPageParser:
                 url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
                 found_ts=self.now,
                 title=item["title"],
-                picture_url=item["images"][0].get("medium")
-                or item["images"][0].get("large")
-                or None,
+                picture_url=_extract_image_url(item),
                 summary_location=item["locationLabel"]["value"],
                 price=item["totalPrice"]["value"],
                 created_dt=_make_tz_aware(datetime.fromisoformat(item["dateCreated"])),

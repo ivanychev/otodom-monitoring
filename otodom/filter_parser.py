@@ -39,6 +39,7 @@ def fetch_listing_html(url: str) -> str:
         http.HTTPStatus.BAD_GATEWAY,
         http.HTTPStatus.SERVICE_UNAVAILABLE,
         http.HTTPStatus.GATEWAY_TIMEOUT,
+        http.HTTPStatus.INTERNAL_SERVER_ERROR,
     ):
         raise RetryableError()
     resp.raise_for_status()
