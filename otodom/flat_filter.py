@@ -132,7 +132,7 @@ class FlatFilter:
 
 
 def _specify_common_conditions(f: FlatFilter) -> FlatFilter:
-    return f.with_max_price(4500).with_min_area(38).with_minimum_build_year(2008)
+    return f.with_max_price(4500).with_min_area(41).with_minimum_build_year(2008)
 
 
 FILTERS = {
