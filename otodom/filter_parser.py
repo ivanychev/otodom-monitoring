@@ -16,7 +16,7 @@ from tenacity import (
 from toolz.itertoolz import unique
 
 from otodom.constants import USER_AGENT
-from otodom.flat_filter import FlatFilter
+from otodom.flat_filter import EstateFilter
 from otodom.listing_page_parser import OtodomFlatsPageParser
 from otodom.models import Flat
 
@@ -33,42 +33,41 @@ class RetryableError(Exception):
     wait=wait_exponential(5),
 )
 def fetch_listing_html(url: str) -> str:
-    headers = {"User-Agent": USER_AGENT}
-    resp = r.get(url, headers=headers)
+    headers = {'User-Agent': USER_AGENT}
+    resp = r.get(url, headers=headers, timeout=15)
     if resp.status_code in (
         http.HTTPStatus.BAD_GATEWAY,
         http.HTTPStatus.SERVICE_UNAVAILABLE,
         http.HTTPStatus.GATEWAY_TIMEOUT,
         http.HTTPStatus.INTERNAL_SERVER_ERROR,
     ):
-        raise RetryableError()
+        raise RetryableError
     resp.raise_for_status()
     return resp.text
 
 
-def _infer_page_count(filter: FlatFilter) -> int:
+def _infer_page_count(filter: EstateFilter) -> int:
     url = filter.with_page(1).compose_url()
-    logger.info("Inferring page count from url: {}", url)
+    logger.info('Inferring page count from url: {}', url)
     html = fetch_listing_html(url)
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, 'html.parser')
 
-    data = json.loads(soup.find_all(attrs={"id": "__NEXT_DATA__"})[0].text)
-    count = data["props"]["pageProps"]["data"]["searchAds"]["pagination"]["totalPages"]
-    return count
+    data = json.loads(soup.find_all(attrs={'id': '__NEXT_DATA__'})[0].text)
+    return data['props']['pageProps']['data']['searchAds']['pagination']['totalPages']
 
 
 def parse_flats_for_filter(
-    filter: FlatFilter,
+    filter: EstateFilter,
     now: datetime,
     sleep_for: int = 3,
 ) -> list[Flat]:
     flats = []
     page_count = _infer_page_count(filter)
-    logger.info("Inferred that the page count is {}", page_count)
+    logger.info('Inferred that the page count is {}', page_count)
     for page_idx in range(1, page_count + 1):
         sleep(sleep_for)
         url = filter.with_page(page_idx).compose_url()
-        logger.info("Querying {}", url)
+        logger.info('Querying {}', url)
         html = fetch_listing_html(url)
         parser = OtodomFlatsPageParser.from_html(html, now=now, filter=filter)
         if parser.is_empty():
@@ -79,4 +78,4 @@ def parse_flats_for_filter(
                 "Looks like there's a next page but the parser failed to parse any flats"
             )
         flats.extend(parser.parse())
-    return list(unique(flats, attrgetter("url")))
+    return list(unique(flats, attrgetter('url')))
