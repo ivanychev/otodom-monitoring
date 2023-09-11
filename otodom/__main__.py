@@ -1,4 +1,3 @@
-import pathlib
 from collections.abc import Sequence
 from datetime import datetime
 from operator import attrgetter
@@ -6,7 +5,6 @@ from operator import attrgetter
 import click
 import pytz
 import timeago
-import tqdm
 from apscheduler.schedulers.blocking import BlockingScheduler
 from loguru import logger
 from telegram import Bot
@@ -15,13 +13,12 @@ from telegram.utils.helpers import escape_markdown
 from otodom.fetch import fetch_and_report
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
-from otodom.models import Flat, FlatList
+from otodom.models import Flat
 from otodom.report import (
     CANONICAL_CHANNEL_IDS,
     _send_flat_summary,
     report_message,
 )
-from otodom.storage import filter_new_estates, init_storage, insert_flats
 from otodom.util import dt_to_naive_utc
 
 
@@ -103,6 +100,7 @@ def fetch_every(
             'bot_token': bot_token,
             'send_report': send_report,
             'telegram_channel_id': telegram_channel_id,
+            'filters': filter
         },
         next_run_time=datetime.now(),
     )
@@ -148,30 +146,6 @@ def print_flats():
             timeago.format(flat.updated_ts, dt_to_naive_utc(ts)),
             flat.url,
         )
-
-
-@cli.command()
-@click.option(
-    '--data-path',
-    default='.',
-    help='The path to use to store SQLite DB and other data.',
-)
-def load_from_wal(data_path: str):
-    data_path = pathlib.Path(data_path).absolute()
-    storage_context = init_storage(data_path)
-    fetched_files = list(storage_context.raw_json_path.rglob('fetched_*'))
-    logger.info('Found {} fetched JSON files', len(fetched_files))
-
-    url_to_flat = {}
-    for fetched_file_path in tqdm.tqdm(fetched_files):
-        for flat in FlatList.parse_file(fetched_file_path).flats:
-            url_to_flat[flat.url] = flat
-
-    flats = list(url_to_flat.values())
-    logger.info('Found {} logged flats', len(flats))
-
-    new_flats = filter_new_estates(storage_context.sqlite_conn, flats)
-    insert_flats(storage_context.sqlite_conn, new_flats)
 
 
 @cli.command()
