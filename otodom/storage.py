@@ -4,7 +4,7 @@ import textwrap
 from datetime import datetime
 from typing import NamedTuple
 
-from otodom.models import Flat, FlatList
+from otodom.models import Flat
 from otodom.util import dt_to_naive_utc
 
 FLATS_TABLE = 'flats'
@@ -135,31 +135,3 @@ def update_flats(conn: sqlite3.Connection, flats: list[Flat], filter_name: str):
     cur.execute(sql)
     _insert_flats_unsafe(cur, flats, filter_name)
     conn.commit()
-
-
-def dump_fetched_flats(
-    flats: list[Flat], filter_name: str, storage_context: StorageContext, now: datetime
-):
-    flat_list = FlatList(flats=flats)
-    dir = storage_context.raw_json_path / f'filter={filter_name}'
-    dir.mkdir(exist_ok=True)
-    with (dir / f'fetched_flat_list_{now.timestamp()}.json').open('w') as f:
-        f.write(flat_list.json())
-
-
-def dump_new_flats(
-    flats: list[Flat], filter_name: str, storage_context: StorageContext, now: datetime
-):
-    dir = storage_context.raw_json_path / f'filter={filter_name}'
-    dir.mkdir(exist_ok=True)
-    with (dir / f'new_flat_list_{now.timestamp()}.json').open('w') as f:
-        f.write(FlatList(flats=flats).json())
-
-
-def dump_updated_flats(
-    flats: list[Flat], filter_name: str, storage_context: StorageContext, now: datetime
-):
-    dir = storage_context.raw_json_path / f'filter={filter_name}'
-    dir.mkdir(exist_ok=True)
-    with (dir / f'updated_flat_list_{now.timestamp()}.json').open('w') as f:
-        f.write(FlatList(flats=flats).json())

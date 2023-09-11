@@ -11,9 +11,6 @@ from otodom.models import Flat
 from otodom.report import report_error, report_new_flats
 from otodom.storage import (
     StorageContext,
-    dump_fetched_flats,
-    dump_new_flats,
-    dump_updated_flats,
     filter_new_estates,
     get_total_flats_in_db,
     init_storage,
@@ -33,7 +30,6 @@ def fetch_and_persist_flats(
 ):
     filter_name = flat_filter.name
     flats = parse_flats_for_filter(flat_filter, now=ts)
-    dump_fetched_flats(flats, filter_name, storage_context, now=ts)
 
     logger.info('Fetched {} flats', len(flats))
     new_and_updated_estates = filter_new_estates(
@@ -41,13 +37,6 @@ def fetch_and_persist_flats(
     )
     logger.info('Found {} new estates', len(new_and_updated_estates.new_flats))
     logger.info('Found {} updated estates', len(new_and_updated_estates.updated_flats))
-
-    dump_new_flats(
-        new_and_updated_estates.new_flats, filter_name, storage_context, now=ts
-    )
-    dump_updated_flats(
-        new_and_updated_estates.updated_flats, filter_name, storage_context, now=ts
-    )
 
     insert_flats(
         storage_context.sqlite_conn, new_and_updated_estates.new_flats, filter_name
@@ -62,7 +51,7 @@ def fetch_and_persist_flats(
         total_flats=total_flats,
     )
 
-def fetch_and_report(data_path: str, bot_token: str, send_report: bool, mode: str,
+def fetch_and_report(data_path: str, bot_token: str, send_report: bool, telegram_channel_id: int,
                      filters: Sequence[str]):
     if not filters:
         raise ValueError('No filters specified')
@@ -87,9 +76,9 @@ def fetch_and_report(data_path: str, bot_token: str, send_report: bool, mode: st
                     bot_token=bot_token,
                     now=ts,
                     report_on_no_new_flats=False,
-                    mode=mode,
+                    telegram_channel_id=telegram_channel_id,
                 )
         logger.info('Fetch for all filters completed.')
     except Exception as e:
-        report_error(bot_token=bot_token, mode=mode, exception=e)
+        report_error(bot_token=bot_token, telegram_channel_id=telegram_channel_id, exception=e)
         raise e

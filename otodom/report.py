@@ -1,6 +1,8 @@
 import textwrap
 import traceback
+from collections.abc import Mapping
 from datetime import datetime
+from types import MappingProxyType
 
 import tenacity
 from loguru import logger
@@ -10,17 +12,11 @@ from telegram.utils.helpers import escape_markdown
 
 from otodom.models import Flat
 
-CHANNEL_ID = -1001527642537
-TEST_CHANNEL_ID = -1001732967254
-
-
-def get_channel_id(mode: str):
-    if mode == 'dev':
-        return TEST_CHANNEL_ID
-    if mode == 'prod':
-        return CHANNEL_ID
-    raise ValueError(f'Unknown mode {mode}')
-
+CANONICAL_CHANNEL_IDS: Mapping[str, int] = MappingProxyType({
+    'test': -1001732967254,
+    'main': -1001527642537,
+    'commercial': -1977809072,
+})
 
 def _compose_html_report(flat: Flat, prefix: str):
     report = textwrap.dedent(
@@ -44,29 +40,29 @@ def _compose_html_report(flat: Flat, prefix: str):
     stop=tenacity.stop_after_attempt(10),
     retry=tenacity.retry_if_exception_type((RetryAfter,)),
 )
-def _send_flat_summary(bot: Bot, flat: Flat, mode: str, prefix: str = ''):
+def _send_flat_summary(bot: Bot, flat: Flat, telegram_channel_id: int, prefix: str = ''):
     bot.send_message(
-        get_channel_id(mode),
+        telegram_channel_id,
         _compose_html_report(flat, prefix=prefix),
         parse_mode=ParseMode.HTML,
         timeout=1000,
     )
     if flat.picture_url:
-        bot.send_photo(get_channel_id(mode), flat.picture_url, timeout=1000)
+        bot.send_photo(telegram_channel_id, flat.picture_url, timeout=1000)
 
 
-def report_message(bot_token: str, mode: str, message: str, escape: bool = False):
+def report_message(bot_token: str, telegram_channel_id: int, message: str, escape: bool = False):
     if escape:
         message = escape_markdown(message, version=2)
     bot = Bot(token=bot_token)
     bot.send_message(
-        get_channel_id(mode),
+        telegram_channel_id,
         message,
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
 
-def report_error(bot_token: str, mode: str, exception: Exception):
+def report_error(bot_token: str, telegram_channel_id: int, exception: Exception):
     bot = Bot(token=bot_token)
     tb = ''.join(
         traceback.format_exception(type(exception), exception, exception.__traceback__)
@@ -84,7 +80,7 @@ Please check the server\\.
 '''
     )
     bot.send_message(
-        get_channel_id(mode),
+        telegram_channel_id,
         msg,
         parse_mode=ParseMode.MARKDOWN_V2,
     )
@@ -98,7 +94,7 @@ def report_new_flats(
     bot_token: str,
     now: datetime,
     report_on_no_new_flats: bool,
-    mode: str,
+    telegram_channel_id: int,
 ):
     bot = Bot(token=bot_token)
     summary_report = f'Found {len(new_flats)} new flats, {len(updated_flats)} updated flats for filter #{filter_name} at {now.isoformat()}, total flats: {total_flats}'
@@ -106,18 +102,18 @@ def report_new_flats(
 
     if (new_flats or updated_flats) or report_on_no_new_flats:
         bot.send_message(
-            get_channel_id(mode),
+            telegram_channel_id,
             summary_report,
             parse_mode=ParseMode.HTML,
         )
     for flat in new_flats:
         _send_flat_summary(
-            bot, flat, mode, prefix=f'Filter: <code>{filter_name}</code>\n<b>NEW</b>'
+            bot, flat, telegram_channel_id, prefix=f'Filter: <code>{filter_name}</code>\n<b>NEW</b>'
         )
     for flat in updated_flats:
         _send_flat_summary(
             bot,
             flat,
-            mode,
+            telegram_channel_id,
             prefix=f'Filter: #{filter_name}\n<b>UPDATED</b>',
         )

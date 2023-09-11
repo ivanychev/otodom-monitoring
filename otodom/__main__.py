@@ -17,6 +17,7 @@ from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
 from otodom.models import Flat, FlatList
 from otodom.report import (
+    CANONICAL_CHANNEL_IDS,
     _send_flat_summary,
     report_message,
 )
@@ -24,7 +25,11 @@ from otodom.storage import filter_new_estates, init_storage, insert_flats
 from otodom.util import dt_to_naive_utc
 
 
-def _report_on_launch(mode: str, bot_token: str, filters: Sequence[str]):
+def _parse_channel_id(telegram_channel_id: str):
+    return CANONICAL_CHANNEL_IDS.get(telegram_channel_id) or int(telegram_channel_id)
+
+
+def _report_on_launch(telegram_channel_id: int, bot_token: str, filters: Sequence[str]):
     now = datetime.now()
     filters = {f: FILTERS[f] for f in filters}
     msg = '\n'.join(
@@ -37,7 +42,7 @@ def _report_on_launch(mode: str, bot_token: str, filters: Sequence[str]):
         + [f.get_markdown_description(name) for name, f in filters.items()]
     )
     logger.info(msg)
-    report_message(bot_token=bot_token, mode=mode, message=msg)
+    report_message(bot_token=bot_token, telegram_channel_id=telegram_channel_id, message=msg)
 
 
 @click.group()
@@ -53,12 +58,16 @@ def cli():
 )
 @click.option('--bot-token', required=True, help='The Telegram bot token to use.')
 @click.option('--send-report', default=True, help='Send report to the Channel.')
-@click.option('--mode', default='dev', help='Run mode.')
 @click.option('--filter', '-f', type=str, multiple=True,
               help='Names of the filters to use')
-def fetch(data_path: str, bot_token: str, send_report: bool, mode: str, filter: list[str]):
-    _report_on_launch(mode=mode, bot_token=bot_token, filters=filter)
-    fetch_and_report(data_path=data_path, bot_token=bot_token, send_report=send_report, mode=mode,
+@click.option(
+    '--telegram-channel-id', required=True, type=str, help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).'
+)
+def fetch(data_path: str, bot_token: str, send_report: bool, filter: list[str],
+          telegram_channel_id: str):
+    telegram_channel_id = _parse_channel_id(telegram_channel_id)
+    _report_on_launch(telegram_channel_id=telegram_channel_id, bot_token=bot_token, filters=filter)
+    fetch_and_report(data_path=data_path, bot_token=bot_token, send_report=send_report, telegram_channel_id=telegram_channel_id,
                      filters=filter)
 
 
@@ -70,15 +79,19 @@ def fetch(data_path: str, bot_token: str, send_report: bool, mode: str, filter: 
 )
 @click.option('--bot-token', required=True, help='The Telegram bot token to use.')
 @click.option('--send-report', default=True, help='Send report to the Channel.')
-@click.option('--mode', default='dev', help='Run mode.')
 @click.option('--minutes', default=15, help='Run every.')
 @click.option('--filter', '-f', type=str, multiple=True,
               help='Names of the filters to use')
+@click.option(
+    '--telegram-channel-id', required=True, type=str, help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).'
+)
 def fetch_every(
-    data_path: str, bot_token: str, send_report: bool, mode: str, minutes: int
+    data_path: str, bot_token: str, send_report: bool, minutes: int,
+    telegram_channel_id: str, filter: list[str]
 ):
+    telegram_channel_id = _parse_channel_id(telegram_channel_id)
     logger.info('Scheduling fetch every {} minutes', minutes)
-    _report_on_launch(mode=mode, bot_token=bot_token)
+    _report_on_launch(telegram_channel_id=telegram_channel_id, bot_token=bot_token, filters=filter)
     scheduler = BlockingScheduler()
     scheduler.add_job(
         fetch_and_report,
@@ -89,7 +102,7 @@ def fetch_every(
             'data_path': data_path,
             'bot_token': bot_token,
             'send_report': send_report,
-            'mode': mode,
+            'telegram_channel_id': telegram_channel_id,
         },
         next_run_time=datetime.now(),
     )
@@ -99,7 +112,7 @@ def fetch_every(
         hour=12,
         kwargs={
             'bot_token': bot_token,
-            'mode': mode,
+            'telegram_channel_id': telegram_channel_id,
             'message': escape_markdown(
                 'Daily check: Zabka Bot is still up and running. Active filters are:\n',
                 version=2,
