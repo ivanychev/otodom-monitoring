@@ -15,7 +15,7 @@ from otodom.models import Flat
 CANONICAL_CHANNEL_IDS: Mapping[str, int] = MappingProxyType({
     'test': -1001732967254,
     'main': -1001527642537,
-    'commercial': -1977809072,
+    'commercial': -1001977809072,
 })
 
 def _compose_html_report(flat: Flat, prefix: str):
