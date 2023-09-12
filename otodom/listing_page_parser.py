@@ -86,5 +86,5 @@ class OtodomFlatsPageParser:
 
 def _get_item_summary_location(item: dict) -> str:
     location_names = [row['fullName']
-                      for row in item['location']['reverseGeocoding']['locations']]
+                      for row in item['location']['reverseGeocoding'].get('locations', ())]
     return ' '.join(reversed(location_names))

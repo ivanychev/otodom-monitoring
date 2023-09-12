@@ -31,7 +31,7 @@ def fetch_and_persist_flats(
     filter_name = flat_filter.name
     flats = parse_flats_for_filter(flat_filter, now=ts)
 
-    logger.info('Fetched {} flats', len(flats))
+    logger.info('Fetched {} estates', len(flats))
     new_and_updated_estates = filter_new_estates(
         storage_context.sqlite_conn, flats, filter_name=filter_name
     )

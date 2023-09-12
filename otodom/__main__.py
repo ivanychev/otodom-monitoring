@@ -116,7 +116,7 @@ def fetch_every(
                 version=2,
             )
             + '\n'.join(
-                [f.get_markdown_description(name) for name, f in FILTERS.items()]
+                [f.get_markdown_description(name) for name, f in FILTERS.items() if name in filter]
             ),
         },
     )
@@ -139,7 +139,7 @@ def print_flats():
     )
 
     flats.sort(key=attrgetter('updated_ts'), reverse=True)
-    logger.info('Fetched {} flats', len(flats))
+    logger.info('Fetched {} estates', len(flats))
     for flat in flats:
         logger.info(
             '{}, Flat url: {}',
