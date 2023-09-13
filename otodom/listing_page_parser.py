@@ -60,9 +60,10 @@ class OtodomFlatsPageParser:
             concat(
                 [
                     payload['props']['pageProps']['data']['searchAds']['items'],
-                    payload['props']['pageProps']['data']['searchAdsRandomPromoted'][
-                        'items'
-                    ],
+                    payload['props']['pageProps']['data'].get('searchAdsRandomPromoted', {}).get(
+                        'items',
+                        ()
+                    ),
                 ]
             ),
             key=itemgetter('id'),

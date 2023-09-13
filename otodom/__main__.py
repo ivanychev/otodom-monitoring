@@ -1,3 +1,4 @@
+import atexit
 from collections.abc import Sequence
 from datetime import datetime
 from operator import attrgetter
@@ -121,6 +122,13 @@ def fetch_every(
         },
     )
     scheduler.start()
+
+    atexit.register(
+        report_message,
+        bot_token=bot_token,
+        telegram_channel_id=telegram_channel_id,
+        message='Zabka bot is shutting down.'
+    )
 
 
 @cli.command()
