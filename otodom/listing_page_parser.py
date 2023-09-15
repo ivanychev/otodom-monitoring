@@ -55,12 +55,14 @@ class OtodomFlatsPageParser:
                 f"Failed to fetch data from from html: base64 {base64.b64encode(self.html.encode('utf8'))}"
             )
         payload: dict = json.loads(data[0].text)
+        data = payload['props']['pageProps']['data']
+
 
         items = unique(
             concat(
                 [
-                    payload['props']['pageProps']['data']['searchAds']['items'],
-                    payload['props']['pageProps']['data'].get('searchAdsRandomPromoted', {}).get(
+                    data['searchAds']['items'],
+                    data.get('searchAdsRandomPromoted', {}).get(
                         'items',
                         ()
                     ),
@@ -87,5 +89,5 @@ class OtodomFlatsPageParser:
 
 def _get_item_summary_location(item: dict) -> str:
     location_names = [row['fullName']
-                      for row in item['location']['reverseGeocoding'].get('locations', ())]
+                      for row in item['location'].get('reverseGeocoding', {}).get('locations', ())]
     return ' '.join(reversed(location_names))
