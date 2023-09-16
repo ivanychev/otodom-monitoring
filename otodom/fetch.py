@@ -7,6 +7,7 @@ from loguru import logger
 
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
+from otodom.listing_page_parser import ParsedDataError
 from otodom.models import Flat
 from otodom.report import report_error, report_new_flats
 from otodom.storage import (
@@ -17,6 +18,7 @@ from otodom.storage import (
     insert_flats,
     update_flats,
 )
+from otodom.telegram_sync import SyncBot
 
 
 class FetchedFlats(NamedTuple):
@@ -51,7 +53,7 @@ def fetch_and_persist_flats(
         total_flats=total_flats,
     )
 
-def fetch_and_report(data_path: str, bot_token: str, send_report: bool, telegram_channel_id: int,
+def fetch_and_report(data_path: str, bot: SyncBot, send_report: bool, telegram_channel_id: int,
                      filters: Sequence[str]):
     if not filters:
         raise ValueError('No filters specified')
@@ -73,12 +75,16 @@ def fetch_and_report(data_path: str, bot_token: str, send_report: bool, telegram
                     new_flats=fetched.new_flats,
                     updated_flats=fetched.update_flats,
                     total_flats=fetched.total_flats,
-                    bot_token=bot_token,
+                    bot=bot,
                     now=ts,
                     report_on_no_new_flats=False,
                     telegram_channel_id=telegram_channel_id,
                 )
         logger.info('Fetch for all filters completed.')
+    except ParsedDataError as e:
+        report_error(bot=bot, telegram_channel_id=telegram_channel_id, exception=e,
+                     context=e.data, uploaded_context_filename=e.uploaded_filename)
+        raise e
     except Exception as e:
-        report_error(bot_token=bot_token, telegram_channel_id=telegram_channel_id, exception=e)
+        report_error(bot=bot, telegram_channel_id=telegram_channel_id, exception=e)
         raise e

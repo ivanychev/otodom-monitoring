@@ -30,6 +30,12 @@ def _extract_image_url(item: dict) -> str | None:
         or None
     )
 
+class ParsedDataError(Exception):
+    def __init__(self, message: str, data: dict, uploaded_filename: str = 'context.json'):
+        self.data = data
+        self.message = message
+        self.uploaded_filename = uploaded_filename
+        super().__init__(self.message)
 
 class OtodomFlatsPageParser:
     def __init__(
@@ -56,6 +62,13 @@ class OtodomFlatsPageParser:
             )
         payload: dict = json.loads(data[0].text)
         data = payload['props']['pageProps']['data']
+        if not data:
+            context = payload | {'__html': self.html}
+            raise ParsedDataError(
+                data=context,
+                message='The $.props.pageProps.data is empty',
+                uploaded_filename='page_next_data.json'
+            )
 
 
         items = unique(
