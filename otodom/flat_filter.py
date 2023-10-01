@@ -165,7 +165,7 @@ FILTERS = {
                    .in_wola()
                    .in_mokotow()
                    .in_srodmiescie()
-                   .with_max_price(9000)
+                   .with_max_price(11000)
                    .with_min_area(50))
 }
 

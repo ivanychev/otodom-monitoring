@@ -64,7 +64,6 @@ def report_error(bot: SyncBot, telegram_channel_id: int, exception: Exception,
     tb = ''.join(
         traceback.format_exception(type(exception), exception, exception.__traceback__)
     )
-    tb = escape_markdown(tb, version=2)
     msg = textwrap.dedent(
         f'''\
 Error occurred to the bot:
