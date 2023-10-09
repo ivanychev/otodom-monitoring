@@ -7,7 +7,7 @@ from loguru import logger
 
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
-from otodom.listing_page_parser import ParsedDataError, LocationNotAvailableError
+from otodom.listing_page_parser import LocationNotAvailableError, ParsedDataError
 from otodom.models import Flat
 from otodom.report import report_error, report_new_flats
 from otodom.storage import (
