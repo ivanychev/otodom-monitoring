@@ -40,6 +40,9 @@ class ParsedDataError(Exception):
         self.uploaded_filename = uploaded_filename
         super().__init__(self.message)
 
+class LocationNotAvailableError(Exception):
+    pass
+
 
 class OtodomFlatsPageParser:
     def __init__(
@@ -78,7 +81,7 @@ class OtodomFlatsPageParser:
             concat(
                 [
                     data['searchAds']['items'],
-                    data.get('searchAdsRandomPromoted', {}).get('items', ()),
+                    (data.get('searchAdsRandomPromoted') or {}).get('items', ()),
                 ]
             ),
             key=itemgetter('id'),
@@ -102,6 +105,8 @@ class OtodomFlatsPageParser:
 
 
 def _get_item_summary_location(item: dict) -> str:
+    if 'location' not in item:
+        raise LocationNotAvailableError
     location_names = [
         row['fullName']
         for row in item['location'].get('reverseGeocoding', {}).get('locations', ())

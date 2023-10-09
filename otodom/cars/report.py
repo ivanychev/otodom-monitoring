@@ -13,11 +13,12 @@ def report_offering(
     telegram_channel_id: str,
 ):
     telegram_channel_id = CANONICAL_CHANNEL_IDS[telegram_channel_id]
+    bot.send_photo_from_url(telegram_channel_id, offering.image_urls[1:4])
     bot.send_message(
         telegram_channel_id,
         textwrap.dedent(
             f'''\
-        **{fact_message}** offering.
+        **{fact_message}** offering (photos 👆)
 
         **Model**: {offering.model_name}
         **Engine type**: {offering.electrification_type}
@@ -29,4 +30,3 @@ def report_offering(
         ),
         parse_mode='md',
     )
-    bot.send_photo_from_url(telegram_channel_id, offering.image_urls[1:4])
