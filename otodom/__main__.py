@@ -122,6 +122,7 @@ def fetch_car_offerings(
     bot_token: str,
     telegram_channel_id: str,
 ):
+    telegram_channel_id = _parse_channel_id(telegram_channel_id)
     bot = SyncBot.from_bot_token(bot_token=bot_token, api_hash=api_hash, api_id=api_id)
     fetch_car_offerings_impl(
         redis_host,

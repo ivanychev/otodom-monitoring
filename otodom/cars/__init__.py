@@ -58,8 +58,12 @@ def fetch_car_offerings_impl(
     namespace: str,
     every_minutes: int,
     bot: SyncBot,
-    telegram_channel_id: str,
+    telegram_channel_id: int,
 ):
+    _report_on_launch(
+        telegram_channel_id=telegram_channel_id,
+        bot=bot
+    )
     redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
     repo = CarsRepository.create(redis_client, namespare=namespace)
     request_builder = (
