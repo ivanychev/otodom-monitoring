@@ -8,15 +8,12 @@ import timeago
 from apscheduler.schedulers.blocking import BlockingScheduler
 from loguru import logger
 
+from otodom.cars import fetch_car_offerings_impl
 from otodom.fetch import fetch_and_report
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
 from otodom.models import Flat
-from otodom.report import (
-    CANONICAL_CHANNEL_IDS,
-    _send_flat_summary,
-    report_message,
-)
+from otodom.report import CANONICAL_CHANNEL_IDS, _send_flat_summary, report_message
 from otodom.telegram_sync import SyncBot, escape_markdown
 from otodom.util import dt_to_naive_utc
 
@@ -53,18 +50,87 @@ def cli():
 @click.option('--api-id', type=int, required=True, help='The Telegram API id.')
 @click.option('--api-hash', type=str, required=True, help='The Telegram API hash.')
 @click.option('--send-report', default=True, help='Send report to the Channel.')
-@click.option('--filter', '-f', type=str, multiple=True,
-              help='Names of the filters to use')
 @click.option(
-    '--telegram-channel-id', required=True, type=str, help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).'
+    '--filter', '-f', type=str, multiple=True, help='Names of the filters to use'
 )
-def fetch(data_path: str, bot_token: str, send_report: bool, filter: list[str],
-          telegram_channel_id: str, api_id: int, api_hash: str):
+@click.option(
+    '--telegram-channel-id',
+    required=True,
+    type=str,
+    help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).',
+)
+def fetch(
+    data_path: str,
+    bot_token: str,
+    send_report: bool,
+    filter: list[str],
+    telegram_channel_id: str,
+    api_id: int,
+    api_hash: str,
+):
     bot = SyncBot.from_bot_token(bot_token=bot_token, api_id=api_id, api_hash=api_hash)
     telegram_channel_id = _parse_channel_id(telegram_channel_id)
     _report_on_launch(telegram_channel_id=telegram_channel_id, bot=bot, filters=filter)
-    fetch_and_report(data_path=data_path, bot=bot, send_report=send_report, telegram_channel_id=telegram_channel_id,
-                     filters=filter)
+    fetch_and_report(
+        data_path=data_path,
+        bot=bot,
+        send_report=send_report,
+        telegram_channel_id=telegram_channel_id,
+        filters=filter,
+    )
+
+
+@cli.command()
+@click.option(
+    '--redis-host',
+    required=True,
+    help='The Redis host',
+)
+@click.option(
+    '--redis-port',
+    default=6379,
+    type=int,
+    help='The redis port',
+)
+@click.option(
+    '--namespace',
+    required=True,
+    help='Namespace of the search.',
+)
+@click.option(
+    '--every-minutes',
+    required=True,
+    type=int,
+    help='Interval of scraping.',
+)
+@click.option('--bot-token', required=True, help='The Telegram bot token to use.')
+@click.option('--api-id', type=int, required=True, help='The Telegram API id.')
+@click.option('--api-hash', type=str, required=True, help='The Telegram API hash.')
+@click.option(
+    '--telegram-channel-id',
+    required=True,
+    type=str,
+    help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).',
+)
+def fetch_car_offerings(
+    redis_host: str,
+    redis_port: int,
+    namespace: str,
+    every_minutes: int,
+    api_id: int,
+    api_hash: str,
+    bot_token: str,
+    telegram_channel_id: str,
+):
+    bot = SyncBot.from_bot_token(bot_token=bot_token, api_hash=api_hash, api_id=api_id)
+    fetch_car_offerings_impl(
+        redis_host,
+        redis_port,
+        namespace=namespace,
+        every_minutes=every_minutes,
+        bot=bot,
+        telegram_channel_id=telegram_channel_id,
+    )
 
 
 @cli.command()
@@ -76,16 +142,26 @@ def fetch(data_path: str, bot_token: str, send_report: bool, filter: list[str],
 @click.option('--bot-token', required=True, help='The Telegram bot token to use.')
 @click.option('--api-id', type=int, required=True, help='The Telegram API id.')
 @click.option('--api-hash', type=str, required=True, help='The Telegram API hash.')
+@click.option(
+    '--telegram-channel-id',
+    required=True,
+    type=str,
+    help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).',
+)
 @click.option('--send-report', default=True, help='Send report to the Channel.')
 @click.option('--minutes', default=15, help='Run every.')
-@click.option('--filter', '-f', type=str, multiple=True,
-              help='Names of the filters to use')
 @click.option(
-    '--telegram-channel-id', required=True, type=str, help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).'
+    '--filter', '-f', type=str, multiple=True, help='Names of the filters to use'
 )
 def fetch_every(
-    data_path: str, bot_token: str, send_report: bool, minutes: int,
-    telegram_channel_id: str, filter: list[str], api_id: int, api_hash: str
+    data_path: str,
+    send_report: bool,
+    minutes: int,
+    filter: list[str],
+    api_id: int,
+    api_hash: str,
+    bot_token: str,
+    telegram_channel_id: str,
 ):
     bot = SyncBot.from_bot_token(bot_token=bot_token, api_hash=api_hash, api_id=api_id)
     telegram_channel_id = _parse_channel_id(telegram_channel_id)
@@ -102,7 +178,7 @@ def fetch_every(
             'bot': bot,
             'send_report': send_report,
             'telegram_channel_id': telegram_channel_id,
-            'filters': filter
+            'filters': filter,
         },
         next_run_time=datetime.now(),
     )
@@ -118,7 +194,11 @@ def fetch_every(
                 version=2,
             )
             + '\n'.join(
-                [f.get_markdown_description(name) for name, f in FILTERS.items() if name in filter]
+                [
+                    f.get_markdown_description(name)
+                    for name, f in FILTERS.items()
+                    if name in filter
+                ]
             ),
         },
     )

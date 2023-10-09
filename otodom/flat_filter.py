@@ -91,7 +91,9 @@ class EstateFilter:
 
     def in_sluzewiec(self):
         self.description.append('In Sluzewiec')
-        self.locations.append('mazowieckie/warszawa/warszawa/warszawa/mokotow/sluzewiec')
+        self.locations.append(
+            'mazowieckie/warszawa/warszawa/warszawa/mokotow/sluzewiec'
+        )
         return self
 
     def in_ochota(self):
@@ -102,17 +104,20 @@ class EstateFilter:
 
     def in_sady_zoliborskie(self):
         self.description.append('In Sady Zoliborskie')
-        self.locations.append('mazowieckie/warszawa/warszawa/warszawa/zoliborz/sady-zoliborskie')
+        self.locations.append(
+            'mazowieckie/warszawa/warszawa/warszawa/zoliborz/sady-zoliborskie'
+        )
         return self
 
     def compose_url(self):
-
         if not self.rent_type:
             raise ValueError('What should be rented is not specified.')
         if not self.locations:
             raise ValueError('Please, specify at least one location')
 
-        url = furl(f'https://www.otodom.pl/pl/wyniki/wynajem/{self.rent_type}/wiele-lokalizacji')
+        url = furl(
+            f'https://www.otodom.pl/pl/wyniki/wynajem/{self.rent_type}/wiele-lokalizacji'
+        )
         locations = '[' + ','.join(self.locations) + ']'
 
         url.args['distanceRadius'] = 0
@@ -149,7 +154,12 @@ class EstateFilter:
 
 
 def _specify_common_conditions(f: EstateFilter) -> EstateFilter:
-    return f.rent_a_flat().with_max_price(4500).with_min_area(41).with_minimum_build_year(2008)
+    return (
+        f.rent_a_flat()
+        .with_max_price(4500)
+        .with_min_area(41)
+        .with_minimum_build_year(2008)
+    )
 
 
 FILTERS = {
@@ -157,16 +167,20 @@ FILTERS = {
     'mokotow': (_specify_common_conditions(EstateFilter('mokotow').in_mokotow())),
     'ochota': (_specify_common_conditions(EstateFilter('ochota').in_ochota())),
     'sady_zoliborskie': (
-        _specify_common_conditions(EstateFilter('sady_zoliborskie').in_sady_zoliborskie())
+        _specify_common_conditions(
+            EstateFilter('sady_zoliborskie').in_sady_zoliborskie()
+        )
     ),
-    'commercial': (EstateFilter('commercial')
-                   .rent_a_commercial_estate()
-                   .in_ochota()
-                   .in_wola()
-                   .in_mokotow()
-                   .in_srodmiescie()
-                   .with_max_price(11000)
-                   .with_min_area(50))
+    'commercial': (
+        EstateFilter('commercial')
+        .rent_a_commercial_estate()
+        .in_ochota()
+        .in_wola()
+        .in_mokotow()
+        .in_srodmiescie()
+        .with_max_price(11000)
+        .with_min_area(50)
+    ),
 }
 
 assert all(f.name == name for name, f in FILTERS.items())

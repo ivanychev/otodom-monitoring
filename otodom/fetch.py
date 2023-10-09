@@ -53,8 +53,14 @@ def fetch_and_persist_flats(
         total_flats=total_flats,
     )
 
-def fetch_and_report(data_path: str, bot: SyncBot, send_report: bool, telegram_channel_id: int,
-                     filters: Sequence[str]):
+
+def fetch_and_report(
+    data_path: str,
+    bot: SyncBot,
+    send_report: bool,
+    telegram_channel_id: int,
+    filters: Sequence[str],
+):
     if not filters:
         raise ValueError('No filters specified')
     try:
@@ -82,8 +88,13 @@ def fetch_and_report(data_path: str, bot: SyncBot, send_report: bool, telegram_c
                 )
         logger.info('Fetch for all filters completed.')
     except ParsedDataError as e:
-        report_error(bot=bot, telegram_channel_id=telegram_channel_id, exception=e,
-                     context=e.data, uploaded_context_filename=e.uploaded_filename)
+        report_error(
+            bot=bot,
+            telegram_channel_id=telegram_channel_id,
+            exception=e,
+            context=e.data,
+            uploaded_context_filename=e.uploaded_filename,
+        )
         raise e
     except Exception as e:
         report_error(bot=bot, telegram_channel_id=telegram_channel_id, exception=e)

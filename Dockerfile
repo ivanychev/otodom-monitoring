@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV POETRY_HOME=/opt/poetry
