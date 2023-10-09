@@ -9,8 +9,15 @@ from otodom.cars.parse import get_dealer_ids
 from otodom.cars.report import report_offering
 from otodom.cars.repository import CarsRepository
 from otodom.cars.search import BmwSearchRequestBuilder
+from otodom.report import report_message
 from otodom.telegram_sync import SyncBot
 
+
+def _report_on_launch(telegram_channel_id: int, bot: SyncBot):
+    now = datetime.now()
+    msg = f'Hey there, BMW crawler bot is reporting! Launching bot at {now.isoformat()}'
+    logger.info(msg)
+    report_message(bot=bot, telegram_channel_id=telegram_channel_id, message=msg)
 
 @logger.catch(reraise=True)
 def fetch_and_report(
@@ -71,5 +78,15 @@ def fetch_car_offerings_impl(
             'telegram_channel_id': telegram_channel_id,
         },
         next_run_time=datetime.now(),
+    )
+    scheduler.add_job(
+        report_message,
+        'cron',
+        hour=12,
+        kwargs={
+            'bot': bot,
+            'telegram_channel_id': telegram_channel_id,
+            'message': 'Daily check: BMW crawler bot is still up and running.',
+        },
     )
     scheduler.start()

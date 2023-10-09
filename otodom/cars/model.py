@@ -30,6 +30,15 @@ class DealerMetadata:
         d = asdict(self)
         return valmap(none_to_empty_string, d)
 
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        data = copy(data)
+        if 'latitude' in data:
+            data['latitude'] = float(data['latitude'])
+        if 'longitude' in data:
+            data['longitude'] = float(data['longitude'])
+        return from_dict(data_class=cls, data=data)
+
 
 @dataclass
 class CarOffering:
@@ -58,4 +67,6 @@ class CarOffering:
         data = copy(data)
         data['system_updated_at'] = datetime.fromisoformat(data['system_updated_at'])
         data['image_urls'] = json.loads(data['image_urls'])
+        if 'gross_sales_price' in data:
+            data['gross_sales_price'] = float(data['gross_sales_price'])
         return from_dict(data_class=cls, data=data)

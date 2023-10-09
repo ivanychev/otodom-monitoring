@@ -1,7 +1,6 @@
 from collections.abc import Iterable, Sequence
 
 import redis
-from dacite import from_dict
 from loguru import logger
 
 from otodom.cars.model import CarOffering, DealerMetadata
@@ -28,7 +27,7 @@ class CarsRepository:
         record = self.r.hgetall(self.compose_dealer_key(dealer_id))
         if not record:
             return None
-        return from_dict(data_class=DealerMetadata, data=record)
+        return DealerMetadata.from_dict(record)
 
     def save_offering(self, offering: CarOffering):
         key = self.compose_offering_key(offering.car_document_id)
