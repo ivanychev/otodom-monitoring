@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from typing import Self
 
@@ -19,16 +19,19 @@ class BmwSearchRequestBuilder:
     min_price: int | None = None
     max_price: int | None = None
     currency: str = 'PLN'
+    description: list[str] = field(default_factory=list)
 
     def with_electric_fuel_type(self) -> Self:
         c = self.degree_of_electrification_based_fuel_type or []
         c.append(ENGINE_ELECTRIC)
-        return replace(self, degree_of_electrification_based_fuel_type=c)
+        return replace(self, degree_of_electrification_based_fuel_type=c,
+                       description=[*self.description, 'Include vehicles with electric engine'])
 
     def with_hybrid_fuel_type(self) -> Self:
         c = self.degree_of_electrification_based_fuel_type or []
         c.append(ENGINE_HYBRID)
-        return replace(self, degree_of_electrification_based_fuel_type=c)
+        return replace(self, degree_of_electrification_based_fuel_type=c,
+                       description=[*self.description, 'Include vehicles with hybrid (PHEV) engine'])
 
     def with_start_index(self, index: int) -> Self:
         return replace(self, start_index=index)
@@ -40,10 +43,15 @@ class BmwSearchRequestBuilder:
         return replace(self, dealer_ids=list(dealer_ids))
 
     def with_min_price(self, price: int) -> Self:
-        return replace(self, min_price=price)
+        return replace(self, min_price=price,
+                       description=[*self.description, f'With min price of {price} {self.currency}'])
 
     def with_max_price(self, price: int) -> Self:
-        return replace(self, max_price=price)
+        return replace(self, max_price=price,
+                       description=[*self.description, f'With max price of {price} {self.currency}'])
+
+    def pretty_str(self) -> str:
+        return 'BMW car finder:\n' + '\n'.join(f'* {d}' for d in self.description)
 
     def _get_search_payload(self) -> dict:
         search_context = {'buNos': self.dealer_ids}

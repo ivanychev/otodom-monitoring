@@ -13,9 +13,9 @@ from otodom.report import report_message
 from otodom.telegram_sync import SyncBot
 
 
-def _report_on_launch(telegram_channel_id: int, bot: SyncBot):
+def _report_on_launch(telegram_channel_id: int, bot: SyncBot, request_builder: BmwSearchRequestBuilder):
     now = datetime.now()
-    msg = f'Hey there, BMW crawler bot is reporting! Launching bot at {now.isoformat()}'
+    msg = f'Hey there, BMW crawler bot is reporting! Launching bot at {now.isoformat()}. Using query:\n\n{request_builder.pretty_str()}'
     logger.info(msg)
     report_message(bot=bot, telegram_channel_id=telegram_channel_id, message=msg)
 
@@ -60,14 +60,15 @@ def fetch_car_offerings_impl(
     bot: SyncBot,
     telegram_channel_id: int,
 ):
-    _report_on_launch(
-        telegram_channel_id=telegram_channel_id,
-        bot=bot
-    )
     redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
     repo = CarsRepository.create(redis_client, namespare=namespace)
     request_builder = (
-        BmwSearchRequestBuilder().with_electric_fuel_type().with_hybrid_fuel_type()
+        BmwSearchRequestBuilder().with_electric_fuel_type().with_hybrid_fuel_type().with_max_price(400000)
+    )
+    _report_on_launch(
+        telegram_channel_id=telegram_channel_id,
+        bot=bot,
+        request_builder=request_builder
     )
     scheduler = BlockingScheduler()
     scheduler.add_job(
@@ -90,7 +91,8 @@ def fetch_car_offerings_impl(
         kwargs={
             'bot': bot,
             'telegram_channel_id': telegram_channel_id,
-            'message': 'Daily check: BMW crawler bot is still up and running.',
+            'message': ('Daily check: BMW crawler bot is still up and running. '
+                        'Using query:\n\n{request_builder.pretty_str()}'),
         },
     )
     scheduler.start()
