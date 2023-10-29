@@ -37,3 +37,7 @@ docker run \
 ```bash
 make format
 ```
+
+## Docker compose
+
+Contains sensitive secrets, encrypted with Ansible vault. Secret is kept in private 1Password.

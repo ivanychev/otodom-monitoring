@@ -12,11 +12,15 @@ from loguru import logger
 from otodom.models import Flat
 from otodom.telegram_sync import SyncBot, escape_markdown
 
-CANONICAL_CHANNEL_IDS: Mapping[str, int] = MappingProxyType({
-    'test': -1001732967254,
-    'main': -1001527642537,
-    'commercial': -1001977809072,
-})
+CANONICAL_CHANNEL_IDS: Mapping[str, int] = MappingProxyType(
+    {
+        'test': -1001732967254,
+        'main': -1001527642537,
+        'commercial': -1001977809072,
+        'bmw': -1001679108520,
+    }
+)
+
 
 def _compose_html_report(flat: Flat, prefix: str):
     report = textwrap.dedent(
@@ -39,17 +43,22 @@ def _compose_html_report(flat: Flat, prefix: str):
 #     wait=tenacity.wait_exponential(min=15, max=60) + tenacity.wait_random(3, 5),
 #     stop=tenacity.stop_after_attempt(10),
 # )
-def _send_flat_summary(bot: SyncBot, flat: Flat, telegram_channel_id: int, prefix: str = ''):
+def _send_flat_summary(
+    bot: SyncBot, flat: Flat, telegram_channel_id: int, prefix: str = ''
+):
     bot.send_message(
         telegram_channel_id,
         _compose_html_report(flat, prefix=prefix),
-        parse_mode='html'
+        parse_mode='html',
     )
 
     if flat.picture_url:
         bot.send_photo_from_url(telegram_channel_id, flat.picture_url)
 
-def report_message(bot: SyncBot, telegram_channel_id: int, message: str, escape: bool = False):
+
+def report_message(
+    bot: SyncBot, telegram_channel_id: int, message: str, escape: bool = False
+):
     if escape:
         message = escape_markdown(message, version=2)
     bot.send_message(
@@ -59,8 +68,13 @@ def report_message(bot: SyncBot, telegram_channel_id: int, message: str, escape:
     )
 
 
-def report_error(bot: SyncBot, telegram_channel_id: int, exception: Exception,
-                 context: dict | list | None = None, uploaded_context_filename: str = 'context.json'):
+def report_error(
+    bot: SyncBot,
+    telegram_channel_id: int,
+    exception: Exception,
+    context: dict | list | None = None,
+    uploaded_context_filename: str = 'context.json',
+):
     tb = ''.join(
         traceback.format_exception(type(exception), exception, exception.__traceback__)
     )
@@ -108,7 +122,10 @@ def report_new_flats(
         )
     for flat in new_flats:
         _send_flat_summary(
-            bot, flat, telegram_channel_id, prefix=f'Filter: <code>{filter_name}</code>\n<b>NEW</b>'
+            bot,
+            flat,
+            telegram_channel_id,
+            prefix=f'Filter: <code>{filter_name}</code>\n<b>NEW</b>',
         )
     for flat in updated_flats:
         _send_flat_summary(

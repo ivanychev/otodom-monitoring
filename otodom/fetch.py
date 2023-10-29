@@ -7,7 +7,7 @@ from loguru import logger
 
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
-from otodom.listing_page_parser import ParsedDataError
+from otodom.listing_page_parser import LocationNotAvailableError, ParsedDataError
 from otodom.models import Flat
 from otodom.report import report_error, report_new_flats
 from otodom.storage import (
@@ -53,8 +53,14 @@ def fetch_and_persist_flats(
         total_flats=total_flats,
     )
 
-def fetch_and_report(data_path: str, bot: SyncBot, send_report: bool, telegram_channel_id: int,
-                     filters: Sequence[str]):
+
+def fetch_and_report(
+    data_path: str,
+    bot: SyncBot,
+    send_report: bool,
+    telegram_channel_id: int,
+    filters: Sequence[str],
+):
     if not filters:
         raise ValueError('No filters specified')
     try:
@@ -82,9 +88,16 @@ def fetch_and_report(data_path: str, bot: SyncBot, send_report: bool, telegram_c
                 )
         logger.info('Fetch for all filters completed.')
     except ParsedDataError as e:
-        report_error(bot=bot, telegram_channel_id=telegram_channel_id, exception=e,
-                     context=e.data, uploaded_context_filename=e.uploaded_filename)
+        report_error(
+            bot=bot,
+            telegram_channel_id=telegram_channel_id,
+            exception=e,
+            context=e.data,
+            uploaded_context_filename=e.uploaded_filename,
+        )
         raise e
+    except LocationNotAvailableError:
+        logger.warning("Location wasn't available in parsed data, but it's usually OK.")
     except Exception as e:
         report_error(bot=bot, telegram_channel_id=telegram_channel_id, exception=e)
         raise e
