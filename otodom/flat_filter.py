@@ -109,6 +109,13 @@ class EstateFilter:
         )
         return self
 
+    def in_zoliborz(self):
+        self.description.append('In Zoliborz')
+        self.locations.append(
+            'mazowieckie/warszawa/warszawa/warszawa/zoliborz'
+        )
+        return self
+
     def compose_url(self):
         if not self.rent_type:
             raise ValueError('What should be rented is not specified.')
@@ -178,8 +185,9 @@ FILTERS = {
         .in_wola()
         .in_mokotow()
         .in_srodmiescie()
-        .with_max_price(11000)
-        .with_min_area(50)
+        .in_zoliborz()
+        .with_max_price(13000)
+        .with_min_area(60)
     ),
 }
 
