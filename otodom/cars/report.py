@@ -10,7 +10,8 @@ def report_offering(
     bot: SyncBot,
     telegram_channel_id: str,
 ):
-    bot.send_photo_from_url(telegram_channel_id, offering.image_urls[:3])
+    # The first images is usually some placeholder, we want to avoid it.
+    bot.send_photo_from_url(telegram_channel_id, offering.image_urls[1:4])
     bot.send_message(
         telegram_channel_id,
         textwrap.dedent(
