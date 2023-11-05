@@ -93,7 +93,7 @@ class OtodomFlatsPageParser:
                 title=item['title'],
                 picture_url=_extract_image_url(item),
                 summary_location=_get_item_summary_location(item),
-                price=item['totalPrice']['value'],
+                price=int(item['totalPrice']['value']),
                 created_dt=_make_tz_aware(datetime.fromisoformat(item['dateCreated'])),
                 pushed_up_dt=datetime.fromisoformat(item['pushedUpAt'])
                 if item['pushedUpAt']

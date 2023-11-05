@@ -43,10 +43,10 @@ def _build_matcher_from_list_of_options(values: list[enum.Enum]) -> Any | OrDict
 
 
 def get_car_images_from_url(url: str) -> list[str]:
-    logger.info("Fetching and parsing HTML from {}", url)
-    resp = r.get(url)
+    logger.info('Fetching and parsing HTML from {}', url)
+    resp = r.get(url, timeout=10)
     soup = BeautifulSoup(resp.text, features='html.parser')
-    elements = soup.select(".link-img")
+    elements = soup.select('.link-img')
     return [
         elem.attrs['data-srcset'].split(' ', maxsplit=1)[0]
         for elem in elements
@@ -147,4 +147,4 @@ class UserBmwCarsSearchRequestBuilder(CarSearcher):
         ]
 
     def pretty_str(self) -> str:
-        return "\n".join(self.verbose_description)
+        return '\n'.join(self.verbose_description)
