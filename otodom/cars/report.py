@@ -1,17 +1,16 @@
 import textwrap
 
-from otodom.cars.model import CarOffering, DealerMetadata
+from otodom.cars.model import CarOffering
 from otodom.telegram_sync import SyncBot
 
 
 def report_offering(
     offering: CarOffering,
-    dealer: DealerMetadata | None,
     fact_message: str,
     bot: SyncBot,
     telegram_channel_id: str,
 ):
-    bot.send_photo_from_url(telegram_channel_id, offering.image_urls[1:4])
+    bot.send_photo_from_url(telegram_channel_id, offering.image_urls[:3])
     bot.send_message(
         telegram_channel_id,
         textwrap.dedent(
@@ -23,6 +22,7 @@ def report_offering(
         **Cost**: {offering.gross_sales_price} {offering.currency}
 
         [Link]({offering.get_url()})
+
         Last update of offering at: {offering.system_updated_at}
         '''
         ),

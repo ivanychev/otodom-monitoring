@@ -50,10 +50,11 @@ class CarOffering:
     gross_sales_price: float
     currency: str
     electrification_type: str
+    url: str
 
     def get_url(self) -> str:
         return (
-            f'https://www.bmw.pl/pl-pl/sl/stocklocator#/details/{self.car_document_id}'
+            self.url
         )
 
     def as_dict(self) -> dict:
