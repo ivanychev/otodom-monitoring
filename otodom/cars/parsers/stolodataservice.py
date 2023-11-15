@@ -6,12 +6,13 @@ from typing import Self
 import requests as r
 from loguru import logger
 
+from otodom.cars import CarSearcher
 from otodom.cars.constants import BASE_DATA_SERVICE_URL, ENGINE_ELECTRIC, ENGINE_HYBRID
 from otodom.cars.model import CarOffering
 
 
 @dataclass(frozen=True)
-class BmwSearchRequestBuilder:
+class BmwSearchRequestBuilder(CarSearcher):
     degree_of_electrification_based_fuel_type: list[str] | None = None
     start_index: int = 0
     max_results: int = 25
@@ -131,6 +132,7 @@ class BmwSearchRequestBuilder:
                 electrification_type=record['vehicle']['vehicleSpecification'][
                     'technicalAndEmission'
                 ]['technicalData']['degreeOfElectrificationBasedFuelType'],
+                url=f"https://www.bmw.pl/pl-pl/sl/stocklocator#/details/{record['vehicle']['documentId']}"
             )
             for record in resp.json()['hits']
         ]
