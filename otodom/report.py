@@ -18,6 +18,7 @@ CANONICAL_CHANNEL_IDS: Mapping[str, int] = MappingProxyType(
         'main': -1001527642537,
         'commercial': -1001977809072,
         'bmw': -1001679108520,
+        'polina': -1002070013905,
     }
 )
 

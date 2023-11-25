@@ -89,6 +89,11 @@ class EstateFilter:
         self.locations.append('mazowieckie/warszawa/warszawa/warszawa/srodmiescie')
         return self
 
+    def in_powisle(self):
+        self.description.append('In Powisle')
+        self.locations.append('mazowieckie/warszawa/warszawa/warszawa/srodmiescie/powisle')
+        return self
+
     def in_sluzewiec(self):
         self.description.append('In Sluzewiec')
         self.locations.append(
@@ -185,10 +190,17 @@ FILTERS = {
         .in_wola()
         .in_mokotow()
         .in_srodmiescie()
+        .in_powisle()
         .in_zoliborz()
-        .with_max_price(13000)
-        .with_min_area(60)
+        .with_max_price(15000)
+        .with_min_area(100)
     ),
+    'polina': (EstateFilter('polina')
+               .rent_a_flat()
+               .with_max_price(3500)
+               .in_wola()
+               .in_srodmiescie()
+               )
 }
 
 assert all(f.name == name for name, f in FILTERS.items())

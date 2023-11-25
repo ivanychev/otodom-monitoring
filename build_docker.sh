@@ -4,19 +4,12 @@ set -euxo pipefail
 export DOCKER_BUILDKIT=1
 
 docker_image=ivanychev/otodom
-docker_tag=0.39
+docker_tag=0.43
 
-## Install emulators for all CPU architectures.
-#docker run --privileged --rm tonistiigi/binfmt --install all
-#
-## Create a builder instance for multiple architectures.
-#docker buildx create --name multiplatform_builder || true
-#docker buildx use multiplatform_builder
 
-docker buildx build \
-     --platform linux/arm64/v8,linux/amd64 \
-     -f Dockerfile \
-     -t "${docker_image}:${docker_tag}" \
-     -t "${docker_image}:latest" \
-     --push \
-     .
+docker build . -f Dockerfile --platform=linux/amd64 -t "${docker_image}:${docker_tag}-amd64"
+docker build . -f Dockerfile --platform=linux/arm64/v8 -t "${docker_image}:${docker_tag}-aarch64"
+docker push "${docker_image}:${docker_tag}-amd64"
+docker push "${docker_image}:${docker_tag}-aarch64"
+docker manifest create --amend "${docker_image}:${docker_tag}" "${docker_image}:${docker_tag}-amd64" "${docker_image}:${docker_tag}-aarch64"
+docker manifest push "${docker_image}:${docker_tag}"     .
