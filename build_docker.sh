@@ -12,4 +12,4 @@ docker build . -f Dockerfile --platform=linux/arm64/v8 -t "${docker_image}:${doc
 docker push "${docker_image}:${docker_tag}-amd64"
 docker push "${docker_image}:${docker_tag}-aarch64"
 docker manifest create --amend "${docker_image}:${docker_tag}" "${docker_image}:${docker_tag}-amd64" "${docker_image}:${docker_tag}-aarch64"
-docker manifest push "${docker_image}:${docker_tag}"     .
+docker manifest push "${docker_image}:${docker_tag}"
