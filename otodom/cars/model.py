@@ -4,8 +4,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Self
 
+from cytoolz import valmap
 from dacite import from_dict
-from toolz import valmap
 
 
 def none_to_empty_string(s: str | None) -> str:

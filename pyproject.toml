@@ -15,7 +15,6 @@ typing-extensions = "^4.8.0"
 pydantic = "^2.4.2"
 click = "^8.1.7"
 loguru = "^0.7.2"
-toolz = "^0.12.0"
 tenacity = "^8.2.3"
 timeago = "^1.0.16"
 apscheduler = "~3.10.4"
@@ -23,6 +22,7 @@ asgiref = "^3.7.2"
 telethon = "^1.30.3"
 redis = {extras = ["hiredis"], version = "^5.0.1"}
 dacite = "^1.8.1"
+cytoolz = "^0.12.2"
 
 
 [tool.poetry.group.dev.dependencies]

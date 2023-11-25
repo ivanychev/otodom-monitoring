@@ -6,6 +6,7 @@ from time import sleep
 
 import requests as r
 from bs4 import BeautifulSoup
+from cytoolz.itertoolz import unique
 from loguru import logger
 from tenacity import (
     retry,
@@ -13,7 +14,6 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
-from toolz.itertoolz import unique
 
 from otodom.constants import USER_AGENT
 from otodom.flat_filter import EstateFilter

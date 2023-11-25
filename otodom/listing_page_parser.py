@@ -7,7 +7,7 @@ from typing import Self
 
 import pytz
 from bs4 import BeautifulSoup
-from toolz import concat, unique
+from cytoolz import concat, unique
 
 from otodom.flat_filter import EstateFilter
 from otodom.models import Flat
@@ -107,8 +107,6 @@ class OtodomFlatsPageParser:
 def _get_item_summary_location(item: dict) -> str:
     if 'location' not in item:
         raise LocationNotAvailableError
-    location_names = [
-        row['fullName']
-        for row in item['location'].get('reverseGeocoding', {}).get('locations', ())
-    ]
-    return ' '.join(reversed(location_names))
+    reverse_geocoding = item['location'].get('reverseGeocoding', {}) or {}
+    locations = reverse_geocoding.get('locations', ()) or ()
+    return ' '.join(row['fullName'] for row in locations[::-1])
