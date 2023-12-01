@@ -75,7 +75,7 @@ def filter_new_estates(
             [filter_name],
         )
         conn.commit()
-    url_to_item = {t[0]: t for t in res}
+        url_to_item = {t[0]: t for t in res}
 
     new_flats = [f for f in flats if f.url not in url_to_item]
     updated_flats = [
