@@ -1,6 +1,7 @@
 import pathlib
 import sqlite3
 import textwrap
+from contextlib import closing
 from datetime import datetime
 from typing import NamedTuple
 
@@ -31,27 +32,28 @@ def init_storage(base_data_path: pathlib.Path) -> StorageContext:
 
     conn = sqlite3.connect((sqlite_db_path / 'flats.db').absolute())
     cur = conn.cursor()
-
-    res = cur.execute(
-        f'''SELECT name FROM sqlite_master WHERE type='table' AND name='{FLATS_TABLE}';'''
-    )
-    exists = bool(res.fetchone())
-    if not exists:
-        cur.execute(
-            f'''
-        CREATE TABLE {FLATS_TABLE} (
-            url text not null,
-            found_ts text,
-            title text,
-            picture_url text,
-            summary_location text,
-            price INTEGER,
-            updated_at text,
-            filter_name text not null,
-            PRIMARY KEY (url, filter_name)
+    with closing(cur):
+        res = cur.execute(
+            f'''SELECT name FROM sqlite_master WHERE type='table' AND name='{FLATS_TABLE}';'''
         )
-        '''
-        )
+        exists = bool(res.fetchone())
+        if not exists:
+            cur.execute(
+                f'''
+            CREATE TABLE {FLATS_TABLE} (
+                url text not null,
+                found_ts text,
+                title text,
+                picture_url text,
+                summary_location text,
+                price INTEGER,
+                updated_at text,
+                filter_name text not null,
+                PRIMARY KEY (url, filter_name)
+            )
+            '''
+            )
+        conn.commit()
     return StorageContext(
         sqlite_conn=conn, raw_json_path=raw_json_path, sqlite_path=sqlite_db_path
     )
@@ -63,14 +65,16 @@ def filter_new_estates(
     cur = conn.cursor()
     urls = [f"""'{f.url}'""" for f in flats]
     urls_in_cond = ','.join(urls)
-    res = cur.execute(
-        f'''
-        SELECT url, updated_at
-        FROM {FLATS_TABLE}
-        WHERE url IN ({urls_in_cond}) AND filter_name = ?
-    ''',
-        [filter_name],
-    )
+    with closing(cur):
+        res = cur.execute(
+            f'''
+            SELECT url, updated_at
+            FROM {FLATS_TABLE}
+            WHERE url IN ({urls_in_cond}) AND filter_name = ?
+        ''',
+            [filter_name],
+        )
+        conn.commit()
     url_to_item = {t[0]: t for t in res}
 
     new_flats = [f for f in flats if f.url not in url_to_item]
@@ -86,14 +90,15 @@ def filter_new_estates(
 
 def get_total_flats_in_db(conn: sqlite3.Connection, filter_name: str):
     cur = conn.cursor()
-    res = cur.execute(
-        f'''
-        SELECT COUNT(*) FROM {FLATS_TABLE}
-        WHERE filter_name = ?
-    ''',
-        [filter_name],
-    )
-    return res.fetchone()[0]
+    with closing(cur):
+        res = cur.execute(
+            f'''
+            SELECT COUNT(*) FROM {FLATS_TABLE}
+            WHERE filter_name = ?
+        ''',
+            [filter_name],
+        )
+        return res.fetchone()[0]
 
 
 def _insert_flats_unsafe(cur: sqlite3.Cursor, flats: list[Flat], filter_name: str):
@@ -132,6 +137,8 @@ def update_flats(conn: sqlite3.Connection, flats: list[Flat], filter_name: str):
         WHERE url IN ({urls_in_cond}) AND filter_name = '{filter_name}'
     '''
     )
-    cur.execute(sql)
-    _insert_flats_unsafe(cur, flats, filter_name)
-    conn.commit()
+    with closing(cur):
+        cur.execute(sql)
+        _insert_flats_unsafe(cur, flats, filter_name)
+        conn.commit()
+
