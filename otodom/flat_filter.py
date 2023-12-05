@@ -197,9 +197,11 @@ FILTERS = {
     ),
     'polina': (EstateFilter('polina')
                .rent_a_flat()
-               .with_max_price(3500)
+               .with_max_price(4500)
                .in_wola()
                .in_srodmiescie()
+               .in_mokotow()
+               .in_ochota()
                )
 }
 
