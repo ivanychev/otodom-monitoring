@@ -41,3 +41,30 @@ make format
 ## Docker compose
 
 Contains sensitive secrets, encrypted with Ansible vault. Secret is kept in private 1Password.
+
+# DB migrations
+
+```bash
+go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+```
+## Create migration
+
+```bash
+migrate create -ext sql -dir db/migrations -seq create_something
+```
+
+## Force to a specific version
+
+```bash
+migrate -path db/migrations \
+  -database sqlite3:///Users/iv/Downloads/flats.db \
+  force 000001
+```
+
+## Run migrations
+
+```bash
+migrate -path db/migrations \
+  -database sqlite3:///Users/iv/Downloads/flats.db \
+  up
+```
