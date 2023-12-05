@@ -4,15 +4,12 @@ from operator import itemgetter
 
 from furl import furl
 from selenium import webdriver
-from selenium.common import NoSuchElementException, TimeoutException, StaleElementReferenceException
+from selenium.common import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.remote.webelement import WebElement
-from bs4 import BeautifulSoup
 import tenacity
 import json
 
-from selenium.webdriver.support.wait import WebDriverWait
 import pandas as pd
 
 Html = str
@@ -93,7 +90,8 @@ def main():
             parse_table(table)
             for table in page_index_to_tables.values()
         ], axis=0)
-    print(df)
+        df = df.reset_index(drop=True)
+        print(df)
 
 
 if __name__ == "__main__":
