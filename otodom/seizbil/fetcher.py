@@ -24,9 +24,9 @@ def fetch_and_report(selenium_host: str, repo: SeizbilRepository, bot: SyncBot,
     logger.info(f'Fetched {len(offerings)} offerings')
     updated = repo.filter_updated(offerings)
     for u in updated:
-        bot.send_message(telegram_channel_id, text=textwrap.dedent(f"""\
+        bot.send_message(telegram_channel_id, text=textwrap.dedent(f'''\
         New offering at [link]({u.document_url}) with ID `{u.document_id}`.
-        
+
         Details:
         * `number` = {u.number}
         * `document_url` = {u.document_url}
@@ -36,8 +36,8 @@ def fetch_and_report(selenium_host: str, repo: SeizbilRepository, bot: SyncBot,
         * `offer_mode` = {u.offer_mode}
         * `submission_start_date` = {u.submission_start_date}
         * `submission_deadline_date` = {u.submission_deadline_date}
-        """), parse_mode='md')
-    logger.info(f"Updated {len(updated)}, inserting them...")
+        '''), parse_mode='md')
+    logger.info(f'Updated {len(updated)}, inserting them...')
     repo.insert(updated)
 
 

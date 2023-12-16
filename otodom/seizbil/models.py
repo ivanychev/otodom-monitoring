@@ -19,7 +19,7 @@ class Offering(BaseModel):
     submission_deadline_date: str | None
 
     def hash(self) -> str:
-        return hashlib.md5(orjson.dumps([
+        return hashlib.md5(orjson.dumps([ # noqa
             self.number,
             self.document_url,
             self.announcement_date,

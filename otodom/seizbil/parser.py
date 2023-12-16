@@ -1,19 +1,16 @@
 import io
-import pathlib
 import time
 from operator import itemgetter
 
 import numpy
+import pandas as pd
+import tenacity
 from furl import furl
 from loguru import logger
 from selenium import webdriver
 from selenium.common import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
-import tenacity
-import json
-
-import pandas as pd
 
 from otodom.seizbil.models import Offering
 
@@ -60,21 +57,21 @@ def click_page_idx(driver: WebDriver, idx: int) -> bool:
     stop=tenacity.stop_after_attempt(5)
 )
 def get_raw_table(d: WebDriver) -> str:
-    return d.find_element(By.CLASS_NAME, "xspDataTable").get_attribute('outerHTML')
+    return d.find_element(By.CLASS_NAME, 'xspDataTable').get_attribute('outerHTML')
 
 
 def parse_raw_tables(driver: WebDriver, limit_pages: int=MAX_INT) -> dict[int, Html]:
     raw_pages: dict[int, str] = {}
-    driver.get(f"{BASE_URL}/seizbil/projekt_konkursy.nsf/konkursyUM.xsp")
+    driver.get(f'{BASE_URL}/seizbil/projekt_konkursy.nsf/konkursyUM.xsp')
 
     current_page = 1
     while True:
         if current_page > limit_pages:
             break
-        logger.info(f"Processing page {current_page}")
+        logger.info(f'Processing page {current_page}')
         clicked = click_page_idx(driver, current_page)
         if not clicked:
-            logger.info(f"Not clicked on {current_page}")
+            logger.info(f'Not clicked on {current_page}')
             break
         raw_pages[current_page] = get_raw_table(driver)
         current_page += 1
@@ -82,7 +79,7 @@ def parse_raw_tables(driver: WebDriver, limit_pages: int=MAX_INT) -> dict[int, H
 
 
 def parse_table(table_html: str) -> pd.DataFrame:
-    df = pd.read_html(io.StringIO(table_html), extract_links="body")[0]
+    df = pd.read_html(io.StringIO(table_html), extract_links='body')[0]
     df = df.set_axis(COLUMNS, axis='columns')
     df['document_url'] = df['number'].apply(lambda item: BASE_URL + item[1])
     df['document_id'] = df['document_url'].apply(lambda url: furl(url).query.params.get('documentId'))
