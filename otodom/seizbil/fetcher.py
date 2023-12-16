@@ -36,7 +36,7 @@ def fetch_and_report(selenium_host: str, repo: SeizbilRepository, bot: SyncBot,
         * `offer_mode` = {u.offer_mode}
         * `submission_start_date` = {u.submission_start_date}
         * `submission_deadline_date` = {u.submission_deadline_date}
-        """))
+        """), parse_mode='md')
     logger.info(f"Updated {len(updated)}, inserting them...")
     repo.insert(updated)
 

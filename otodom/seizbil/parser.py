@@ -102,8 +102,6 @@ def fetch_and_parse_offers(selenium_host: str, limit_pages:int=MAX_INT) -> list[
             options=webdriver.ChromeOptions()
     ) as driver:
         page_index_to_tables = parse_raw_tables(driver, limit_pages=limit_pages)
-        pathlib.Path("/Users/iv/Desktop/temp.json").write_text(json.dumps(page_index_to_tables, indent=2))
-        page_index_to_tables = json.loads(pathlib.Path("/Users/iv/Desktop/temp.json").read_text())
         df = pd.concat([
             parse_table(table)
             for table in page_index_to_tables.values()
