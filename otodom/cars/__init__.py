@@ -55,10 +55,15 @@ def get_new_bmw_searcher() -> BmwSearchRequestBuilder:
 
 def get_used_bmw_searcher() -> BmwSearchRequestBuilder:
     return (UserBmwCarsSearchRequestBuilder()
-            .with_max_price(400000)
+            .with_max_price(300000)
             .include_automatic_gearbox()
             .include_gasoline_hybrids()
+            .include_gasoline()
             .include_diesel_hybrids()
+            .with_min_doors(4)
+            .with_max_doors(4)
+            .with_max_mileage(50000)
+            .with_driving_wheel_heating()
             .include_electric_engines())
 
 
