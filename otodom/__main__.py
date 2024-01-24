@@ -14,6 +14,7 @@ from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
 from otodom.models import Flat
 from otodom.report import CANONICAL_CHANNEL_IDS, _send_flat_summary, report_message
+from otodom.seizbil.fetcher import fetch_seizbil_offerings_impl
 from otodom.telegram_sync import SyncBot, escape_markdown
 from otodom.util import dt_to_naive_utc
 
@@ -127,6 +128,62 @@ def fetch_car_offerings(
     fetch_car_offerings_impl(
         redis_host,
         redis_port,
+        namespace=namespace,
+        every_minutes=every_minutes,
+        bot=bot,
+        telegram_channel_id=telegram_channel_id,
+    )
+
+@cli.command()
+@click.option(
+    '--redis-host',
+    required=True,
+    help='The Redis host',
+)
+@click.option(
+    '--redis-port',
+    default=6379,
+    type=int,
+    help='The redis port',
+)
+@click.option(
+    '--namespace',
+    required=True,
+    help='Namespace of the search.',
+)
+@click.option(
+    '--every-minutes',
+    required=True,
+    type=int,
+    help='Interval of scraping.',
+)
+@click.option('--bot-token', required=True, help='The Telegram bot token to use.')
+@click.option('--selenium-host', required=True, help='Selenium host to use.')
+@click.option('--api-id', type=int, required=True, help='The Telegram API id.')
+@click.option('--api-hash', type=str, required=True, help='The Telegram API hash.')
+@click.option(
+    '--telegram-channel-id',
+    required=True,
+    type=str,
+    help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).',
+)
+def fetch_seizbil_offerings(
+        redis_host: str,
+        redis_port: int,
+        namespace: str,
+        every_minutes: int,
+        api_id: int,
+        api_hash: str,
+        bot_token: str,
+        telegram_channel_id: str,
+        selenium_host: str
+):
+    telegram_channel_id = _parse_channel_id(telegram_channel_id)
+    bot = SyncBot.from_bot_token(bot_token=bot_token, api_hash=api_hash, api_id=api_id)
+    fetch_seizbil_offerings_impl(
+        redis_host,
+        redis_port,
+        selenium_host=selenium_host,
         namespace=namespace,
         every_minutes=every_minutes,
         bot=bot,

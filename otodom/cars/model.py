@@ -7,9 +7,7 @@ from typing import Self
 from cytoolz import valmap
 from dacite import from_dict
 
-
-def none_to_empty_string(s: str | None) -> str:
-    return s or ''
+from otodom.helpers import none_to_empty_string
 
 
 @dataclass(frozen=True)
