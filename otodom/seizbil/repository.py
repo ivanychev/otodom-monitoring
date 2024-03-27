@@ -31,7 +31,11 @@ class RedisSeizbilRepository(SeizbilRepository):
             for o in offerings:
                 pipe.hgetall(self.key_for(o))
             retrieved = pipe.execute()
-        logger.info('Fetched current {} keys, got {} non-nulls', len(retrieved), len([s for s in retrieved if s]))
+        logger.info(
+            'Fetched current {} keys, got {} non-nulls',
+            len(retrieved),
+            len([s for s in retrieved if s]),
+        )
         updated = []
         for current, saved in zip(offerings, retrieved, strict=True):
             if not saved or current.document_id != saved['document_id']:
@@ -56,4 +60,3 @@ if __name__ == '__main__':
     updated = repo.filter_updated(offerings)
     print(updated)
     repo.insert(updated)
-

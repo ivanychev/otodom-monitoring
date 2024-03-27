@@ -27,9 +27,7 @@ def _report_on_launch(telegram_channel_id: int, bot: SyncBot, filters: Sequence[
     now = datetime.now()
     filters = {f: FILTERS[f] for f in filters}
     msg = '\n'.join(
-        [
-            f'Hey there, Zabka reporting! Launching bot at {now.isoformat()}. Active filters:'
-        ]
+        [f'Hey there, Zabka reporting! Launching bot at {now.isoformat()}. Active filters:']
         + [f.get_markdown_description(name) for name, f in filters.items()]
     )
     logger.info(msg)
@@ -51,9 +49,7 @@ def cli():
 @click.option('--api-id', type=int, required=True, help='The Telegram API id.')
 @click.option('--api-hash', type=str, required=True, help='The Telegram API hash.')
 @click.option('--send-report', default=True, help='Send report to the Channel.')
-@click.option(
-    '--filter', '-f', type=str, multiple=True, help='Names of the filters to use'
-)
+@click.option('--filter', '-f', type=str, multiple=True, help='Names of the filters to use')
 @click.option(
     '--telegram-channel-id',
     required=True,
@@ -134,6 +130,7 @@ def fetch_car_offerings(
         telegram_channel_id=telegram_channel_id,
     )
 
+
 @cli.command()
 @click.option(
     '--redis-host',
@@ -168,15 +165,15 @@ def fetch_car_offerings(
     help='Telegram channel ID. Can be the name of the channel stored in the internal registry (CANONICAL_CHANNEL_IDS).',
 )
 def fetch_seizbil_offerings(
-        redis_host: str,
-        redis_port: int,
-        namespace: str,
-        every_minutes: int,
-        api_id: int,
-        api_hash: str,
-        bot_token: str,
-        telegram_channel_id: str,
-        selenium_host: str
+    redis_host: str,
+    redis_port: int,
+    namespace: str,
+    every_minutes: int,
+    api_id: int,
+    api_hash: str,
+    bot_token: str,
+    telegram_channel_id: str,
+    selenium_host: str,
 ):
     telegram_channel_id = _parse_channel_id(telegram_channel_id)
     bot = SyncBot.from_bot_token(bot_token=bot_token, api_hash=api_hash, api_id=api_id)
@@ -208,9 +205,7 @@ def fetch_seizbil_offerings(
 )
 @click.option('--send-report', default=True, help='Send report to the Channel.')
 @click.option('--minutes', default=15, help='Run every.')
-@click.option(
-    '--filter', '-f', type=str, multiple=True, help='Names of the filters to use'
-)
+@click.option('--filter', '-f', type=str, multiple=True, help='Names of the filters to use')
 def fetch_every(
     data_path: str,
     send_report: bool,
@@ -252,11 +247,7 @@ def fetch_every(
                 version=2,
             )
             + '\n'.join(
-                [
-                    f.get_markdown_description(name)
-                    for name, f in FILTERS.items()
-                    if name in filter
-                ]
+                [f.get_markdown_description(name) for name, f in FILTERS.items() if name in filter]
             ),
         },
     )

@@ -35,9 +35,7 @@ class CarsRepository:
             logger.info('Removed previous offering at {}', key)
 
         self.r.hset(key, mapping=offering.as_dict())
-        logger.info(
-            'Saved offering with id {} to key {}', offering.car_document_id, key
-        )
+        logger.info('Saved offering with id {} to key {}', offering.car_document_id, key)
 
     def save_dealer(self, dealer: DealerMetadata, client: redis.Redis | None = None):
         client = client or self.r

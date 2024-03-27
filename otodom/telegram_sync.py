@@ -19,19 +19,15 @@ class SyncBot:
     @classmethod
     def from_bot_token(cls, api_id: int, api_hash: str, bot_token: str) -> Self:
         event_loop = asyncio.get_event_loop()
-        client = TelegramClient(
-            api_id=api_id, api_hash=api_hash, session='otodom'
-        ).start(bot_token=bot_token)
+        client = TelegramClient(api_id=api_id, api_hash=api_hash, session='otodom').start(
+            bot_token=bot_token
+        )
 
         return cls(client=client, event_loop=event_loop)
 
-    def send_message(
-        self, chat_id: int | str, text: str, parse_mode: Literal['md', 'html']
-    ):
+    def send_message(self, chat_id: int | str, text: str, parse_mode: Literal['md', 'html']):
         return self.event_loop.run_until_complete(
-            self.client.send_message(
-                entity=chat_id, message=text, parse_mode=parse_mode
-            )
+            self.client.send_message(entity=chat_id, message=text, parse_mode=parse_mode)
         )
 
     def send_document(self, chat_id: int | str, document: FileLike):

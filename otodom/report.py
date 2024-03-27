@@ -26,14 +26,14 @@ CANONICAL_CHANNEL_IDS: Mapping[str, int] = MappingProxyType(
 
 def _compose_html_report(flat: Flat, prefix: str):
     report = textwrap.dedent(
-        f'''\
+        f"""\
     <strong>{flat.title}</strong>
 
     <strong>Location:</strong> {flat.summary_location}
     <strong>Price:</strong>  {flat.price}
 
     <a href="{flat.url}">Link</a>
-    '''
+    """
     )
 
     if prefix:
@@ -45,9 +45,7 @@ def _compose_html_report(flat: Flat, prefix: str):
 #     wait=tenacity.wait_exponential(min=15, max=60) + tenacity.wait_random(3, 5),
 #     stop=tenacity.stop_after_attempt(10),
 # )
-def _send_flat_summary(
-    bot: SyncBot, flat: Flat, telegram_channel_id: int, prefix: str = ''
-):
+def _send_flat_summary(bot: SyncBot, flat: Flat, telegram_channel_id: int, prefix: str = ''):
     bot.send_message(
         telegram_channel_id,
         _compose_html_report(flat, prefix=prefix),
@@ -58,9 +56,7 @@ def _send_flat_summary(
         bot.send_photo_from_url(telegram_channel_id, flat.picture_url)
 
 
-def report_message(
-    bot: SyncBot, telegram_channel_id: int, message: str, escape: bool = False
-):
+def report_message(bot: SyncBot, telegram_channel_id: int, message: str, escape: bool = False):
     if escape:
         message = escape_markdown(message, version=2)
     bot.send_message(
@@ -77,11 +73,9 @@ def report_error(
     context: dict | list | None = None,
     uploaded_context_filename: str = 'context.json',
 ):
-    tb = ''.join(
-        traceback.format_exception(type(exception), exception, exception.__traceback__)
-    )
+    tb = ''.join(traceback.format_exception(type(exception), exception, exception.__traceback__))
     msg = textwrap.dedent(
-        f'''\
+        f"""\
 Error occurred to the bot:
 
 ```
@@ -89,7 +83,7 @@ Error occurred to the bot:
 ```
 
 Please check the server\\.
-'''
+"""
     )
     bot.send_message(
         telegram_channel_id,

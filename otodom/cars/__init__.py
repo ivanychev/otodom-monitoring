@@ -23,10 +23,10 @@ def _report_on_launch(telegram_channel_id: int, bot: SyncBot, request_builder: C
 
 @logger.catch(reraise=True)
 def fetch_and_report(
-        repo: CarsRepository,
-        request_builder: CarSearcher,
-        bot: SyncBot,
-        telegram_channel_id: str,
+    repo: CarsRepository,
+    request_builder: CarSearcher,
+    bot: SyncBot,
+    telegram_channel_id: str,
 ):
     offerings = request_builder.search_all()
     new_offerings, updated_offerings = repo.remove_existing_offerings(offerings)
@@ -50,38 +50,43 @@ def fetch_and_report(
 
 
 def get_new_bmw_searcher() -> BmwSearchRequestBuilder:
-    return BmwSearchRequestBuilder().with_electric_fuel_type().with_hybrid_fuel_type().with_max_price(400000)
+    return (
+        BmwSearchRequestBuilder()
+        .with_electric_fuel_type()
+        .with_hybrid_fuel_type()
+        .with_max_price(400000)
+    )
 
 
 def get_used_bmw_searcher() -> BmwSearchRequestBuilder:
-    return (UserBmwCarsSearchRequestBuilder()
-            .with_max_price(300000)
-            .include_automatic_gearbox()
-            .include_gasoline_hybrids()
-            .include_gasoline()
-            .include_diesel_hybrids()
-            .with_min_doors(4)
-            .with_max_doors(4)
-            .with_max_mileage(50000)
-            .with_driving_wheel_heating()
-            .include_electric_engines())
+    return (
+        UserBmwCarsSearchRequestBuilder()
+        .with_max_price(300000)
+        .include_automatic_gearbox()
+        .include_gasoline_hybrids()
+        .include_gasoline()
+        .include_diesel_hybrids()
+        .with_min_doors(4)
+        .with_max_doors(4)
+        .with_max_mileage(50000)
+        .with_driving_wheel_heating()
+        .include_electric_engines()
+    )
 
 
 def fetch_car_offerings_impl(
-        redis_host: str,
-        redis_port: int,
-        namespace: str,
-        every_minutes: int,
-        bot: SyncBot,
-        telegram_channel_id: int,
+    redis_host: str,
+    redis_port: int,
+    namespace: str,
+    every_minutes: int,
+    bot: SyncBot,
+    telegram_channel_id: int,
 ):
     redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
     repo = CarsRepository.create(redis_client, namespare=namespace)
     request_builder = get_used_bmw_searcher()
     _report_on_launch(
-        telegram_channel_id=telegram_channel_id,
-        bot=bot,
-        request_builder=request_builder
+        telegram_channel_id=telegram_channel_id, bot=bot, request_builder=request_builder
     )
     scheduler = BlockingScheduler()
     scheduler.add_job(
@@ -104,8 +109,10 @@ def fetch_car_offerings_impl(
         kwargs={
             'bot': bot,
             'telegram_channel_id': telegram_channel_id,
-            'message': ('Daily check: BMW crawler bot is still up and running. '
-                        f'Using query:\n\n{request_builder.pretty_str()}'),
+            'message': (
+                'Daily check: BMW crawler bot is still up and running. '
+                f'Using query:\n\n{request_builder.pretty_str()}'
+            ),
         },
     )
     scheduler.start()

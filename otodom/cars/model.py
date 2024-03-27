@@ -51,9 +51,7 @@ class CarOffering:
     url: str
 
     def get_url(self) -> str:
-        return (
-            self.url
-        )
+        return self.url
 
     def as_dict(self) -> dict:
         d = asdict(self)

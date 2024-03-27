@@ -15,7 +15,7 @@ def report_offering(
     bot.send_message(
         telegram_channel_id,
         textwrap.dedent(
-            f'''\
+            f"""\
         **{fact_message}** offering (photos 👆)
 
         **Model**: {offering.model_name}
@@ -25,7 +25,7 @@ def report_offering(
         [Link]({offering.get_url()})
 
         Last update of offering at: {offering.system_updated_at}
-        '''
+        """
         ),
         parse_mode='md',
     )

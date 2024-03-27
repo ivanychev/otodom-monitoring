@@ -25,14 +25,20 @@ class BmwSearchRequestBuilder(CarSearcher):
     def with_electric_fuel_type(self) -> Self:
         c = self.degree_of_electrification_based_fuel_type or []
         c.append(ENGINE_ELECTRIC)
-        return replace(self, degree_of_electrification_based_fuel_type=c,
-                       description=[*self.description, 'Include vehicles with electric engine'])
+        return replace(
+            self,
+            degree_of_electrification_based_fuel_type=c,
+            description=[*self.description, 'Include vehicles with electric engine'],
+        )
 
     def with_hybrid_fuel_type(self) -> Self:
         c = self.degree_of_electrification_based_fuel_type or []
         c.append(ENGINE_HYBRID)
-        return replace(self, degree_of_electrification_based_fuel_type=c,
-                       description=[*self.description, 'Include vehicles with hybrid (PHEV) engine'])
+        return replace(
+            self,
+            degree_of_electrification_based_fuel_type=c,
+            description=[*self.description, 'Include vehicles with hybrid (PHEV) engine'],
+        )
 
     def with_start_index(self, index: int) -> Self:
         return replace(self, start_index=index)
@@ -44,12 +50,18 @@ class BmwSearchRequestBuilder(CarSearcher):
         return replace(self, dealer_ids=list(dealer_ids))
 
     def with_min_price(self, price: int) -> Self:
-        return replace(self, min_price=price,
-                       description=[*self.description, f'With min price of {price} {self.currency}'])
+        return replace(
+            self,
+            min_price=price,
+            description=[*self.description, f'With min price of {price} {self.currency}'],
+        )
 
     def with_max_price(self, price: int) -> Self:
-        return replace(self, max_price=price,
-                       description=[*self.description, f'With max price of {price} {self.currency}'])
+        return replace(
+            self,
+            max_price=price,
+            description=[*self.description, f'With max price of {price} {self.currency}'],
+        )
 
     def pretty_str(self) -> str:
         return 'BMW car finder:\n' + '\n'.join(f'* {d}' for d in self.description)
@@ -126,13 +138,13 @@ class BmwSearchRequestBuilder(CarSearcher):
                 dealer_id=record['vehicle']['ordering']['retailData']['buNo'],
                 gross_sales_price=float(record['vehicle']['price']['grossSalesPrice']),
                 currency=record['vehicle']['price']['listPriceCurrency'],
-                model_name=record['vehicle']['vehicleSpecification']['modelAndOption'][
-                    'model'
-                ]['modelDescription']['en_PL'],
+                model_name=record['vehicle']['vehicleSpecification']['modelAndOption']['model'][
+                    'modelDescription'
+                ]['en_PL'],
                 electrification_type=record['vehicle']['vehicleSpecification'][
                     'technicalAndEmission'
                 ]['technicalData']['degreeOfElectrificationBasedFuelType'],
-                url=f"https://www.bmw.pl/pl-pl/sl/stocklocator#/details/{record['vehicle']['documentId']}"
+                url=f"https://www.bmw.pl/pl-pl/sl/stocklocator#/details/{record['vehicle']['documentId']}",
             )
             for record in resp.json()['hits']
         ]
@@ -144,7 +156,5 @@ class BmwSearchRequestBuilder(CarSearcher):
         for start in range(0, total_count, self.max_results):
             end = min(start + self.max_results, total_count)
             delta = end - start
-            offerings.extend(
-                self.with_max_results(delta).with_start_index(start).search()
-            )
+            offerings.extend(self.with_max_results(delta).with_start_index(start).search())
         return offerings

@@ -19,16 +19,21 @@ class Offering(BaseModel):
     submission_deadline_date: str | None
 
     def hash(self) -> str:
-        return hashlib.md5(orjson.dumps([ # noqa
-            self.number,
-            self.document_url,
-            self.announcement_date,
-            self.district,
-            self.type,
-            self.offer_mode,
-            self.submission_start_date,
-            self.submission_deadline_date,
-        ])).hexdigest()
+        # ruff: noqa: S324
+        return hashlib.md5(
+            orjson.dumps(
+                [
+                    self.number,
+                    self.document_url,
+                    self.announcement_date,
+                    self.district,
+                    self.type,
+                    self.offer_mode,
+                    self.submission_start_date,
+                    self.submission_deadline_date,
+                ]
+            )
+        ).hexdigest()
 
     def as_dict(self) -> dict:
         d = dict(self)

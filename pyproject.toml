@@ -36,7 +36,7 @@ black = "^23.11.0"
 isort = "^5.12.0"
 pycln = "^2.3.0"
 pyupgrade = "^3.15.0"
-ruff = "^0.1.4"
+ruff = "^0.3.3"
 tzlocal = "<3.0"
 
 [build-system]
@@ -45,7 +45,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 100
-select = [
+lint.select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
     "UP",  # pyupgrade
@@ -68,7 +68,7 @@ select = [
     "BLE",  # flake8-blind-except
 ]
 target-version = "py312"
-ignore = [
+lint.ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
@@ -86,6 +86,11 @@ ignore = [
     # TODO: enable following rules
     "RUF012", # TODO: enable: Mutable class attributes
     "PT011", # pytest.raises is too broad
+    "ISC001",
+    "ISC002",
+    "Q000",
+    "Q001",
+    "Q003",
 ]
 exclude = [
     ".bzr",
@@ -110,12 +115,17 @@ exclude = [
     "venv",
 ]
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
 inline-quotes = "single"
 multiline-quotes = "single"
 
-[tool.ruff.isort]
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
 known-first-party = ["pipelines", "common_utils", "expectations"]
 
 [tool.black]

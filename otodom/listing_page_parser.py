@@ -32,22 +32,19 @@ def _extract_image_url(item: dict) -> str | None:
 
 
 class ParsedDataError(Exception):
-    def __init__(
-        self, message: str, data: dict, uploaded_filename: str = 'context.json'
-    ):
+    def __init__(self, message: str, data: dict, uploaded_filename: str = 'context.json'):
         self.data = data
         self.message = message
         self.uploaded_filename = uploaded_filename
         super().__init__(self.message)
+
 
 class LocationNotAvailableError(Exception):
     pass
 
 
 class OtodomFlatsPageParser:
-    def __init__(
-        self, soup: BeautifulSoup, now: datetime, html: str, filter: EstateFilter
-    ):
+    def __init__(self, soup: BeautifulSoup, now: datetime, html: str, filter: EstateFilter):
         self.soup = soup
         self.now = now
         self.html = html

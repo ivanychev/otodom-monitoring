@@ -40,12 +40,8 @@ def fetch_and_persist_flats(
     logger.info('Found {} new estates', len(new_and_updated_estates.new_flats))
     logger.info('Found {} updated estates', len(new_and_updated_estates.updated_flats))
 
-    insert_flats(
-        storage_context.sqlite_conn, new_and_updated_estates.new_flats, filter_name
-    )
-    update_flats(
-        storage_context.sqlite_conn, new_and_updated_estates.updated_flats, filter_name
-    )
+    insert_flats(storage_context.sqlite_conn, new_and_updated_estates.new_flats, filter_name)
+    update_flats(storage_context.sqlite_conn, new_and_updated_estates.updated_flats, filter_name)
     total_flats = get_total_flats_in_db(storage_context.sqlite_conn, filter_name)
     return FetchedFlats(
         new_flats=new_and_updated_estates.new_flats,
