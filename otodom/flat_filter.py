@@ -181,7 +181,7 @@ FILTERS = {
         .with_min_area(100)
     ),
     'commercial_all_mokotow': (
-        EstateFilter('commercial')
+        EstateFilter('commercial_all_mokotow')
         .rent_a_commercial_estate()
         .in_mokotow()
         .with_min_area(100)
