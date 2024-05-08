@@ -180,6 +180,12 @@ FILTERS = {
         .with_max_price(15000)
         .with_min_area(100)
     ),
+    'commercial_all_mokotow': (
+        EstateFilter('commercial')
+        .rent_a_commercial_estate()
+        .in_mokotow()
+        .with_min_area(100)
+    ),
     'polina': (
         EstateFilter('polina')
         .rent_a_flat()
