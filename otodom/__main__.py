@@ -1,3 +1,4 @@
+import sqlite3
 from collections.abc import Sequence
 from datetime import datetime
 from operator import attrgetter
@@ -7,11 +8,13 @@ import pytz
 import timeago
 from apscheduler.schedulers.blocking import BlockingScheduler
 from loguru import logger
+from tqdm import tqdm
 
 from otodom.cars import fetch_car_offerings_impl
 from otodom.fetch import fetch_and_report
 from otodom.filter_parser import parse_flats_for_filter
 from otodom.flat_filter import FILTERS, EstateFilter
+from otodom.flat_page_parser import parse_flat_page
 from otodom.models import Flat
 from otodom.report import CANONICAL_CHANNEL_IDS, _send_flat_summary, report_message
 from otodom.seizbil.fetcher import fetch_seizbil_offerings_impl
@@ -298,6 +301,19 @@ def send_test_flat(bot_token: str, api_id: int, api_hash: str):
         prefix='Test!!!',
     )
 
+
+def parse_flats_gen():
+    conn = sqlite3.connect('/Users/iv/Downloads/flats-2.db')
+    cursor = conn.cursor()
+    result = cursor.execute('''
+        SELECT url
+        FROM flats
+        WHERE filter_name = 'commercial_all_mokotow' ''')
+    urls = [r[0] for r in result.fetchall()]
+    for url in tqdm(urls):
+        flat = parse_flat_page(url)
+        if flat:
+            yield flat
 
 if __name__ == '__main__':
     cli()

@@ -162,33 +162,46 @@ def _specify_common_conditions(f: EstateFilter) -> EstateFilter:
 
 
 FILTERS = {
-    'wola': (_specify_common_conditions(EstateFilter('wola').in_wola())),
-    'mokotow': (_specify_common_conditions(EstateFilter('mokotow').in_mokotow())),
-    'ochota': (_specify_common_conditions(EstateFilter('ochota').in_ochota())),
-    'sady_zoliborskie': (
-        _specify_common_conditions(EstateFilter('sady_zoliborskie').in_sady_zoliborskie())
-    ),
-    'commercial': (
-        EstateFilter('commercial')
-        .rent_a_commercial_estate()
-        .in_ochota()
-        .in_wola()
-        .in_mokotow()
-        .in_srodmiescie()
-        .in_powisle()
-        .in_zoliborz()
-        .with_max_price(15000)
-        .with_min_area(100)
-    ),
-    'polina': (
-        EstateFilter('polina')
+    # 'wola': (_specify_common_conditions(EstateFilter('wola').in_wola())),
+    # 'mokotow': (_specify_common_conditions(EstateFilter('mokotow').in_mokotow())),
+    # 'ochota': (_specify_common_conditions(EstateFilter('ochota').in_ochota())),
+    # 'sady_zoliborskie': (
+    #     _specify_common_conditions(EstateFilter('sady_zoliborskie').in_sady_zoliborskie())
+    # ),
+    # 'commercial': (
+    #     EstateFilter('commercial')
+    #     .rent_a_commercial_estate()
+    #     .in_ochota()
+    #     .in_wola()
+    #     .in_mokotow()
+    #     .in_srodmiescie()
+    #     .in_powisle()
+    #     .in_zoliborz()
+    #     .with_max_price(15000)
+    #     .with_min_area(100)
+    # ),
+    # 'commercial_all_mokotow': (
+    #     EstateFilter('commercial_all_mokotow')
+    #     .rent_a_commercial_estate()
+    #     .in_mokotow()
+    #     .with_min_area(100)
+    # ),
+    # 'polina': (
+    #     EstateFilter('polina')
+    #     .rent_a_flat()
+    #     .with_max_price(4500)
+    #     .in_wola()
+    #     .in_srodmiescie()
+    #     .in_mokotow()
+    #     .in_ochota()
+    # ),
+    'sm': (
+        EstateFilter('sm')
         .rent_a_flat()
-        .with_max_price(4500)
-        .in_wola()
-        .in_srodmiescie()
+        .with_max_price(8000)
         .in_mokotow()
-        .in_ochota()
-    ),
+        .with_min_area(60)
+    )
 }
 
 assert all(f.name == name for name, f in FILTERS.items())
