@@ -219,13 +219,13 @@ class UserBmwCarsSearchRequestBuilder(CarSearcher):
                 system_updated_at=datetime.fromisoformat(o['created']),
                 model_name=o['title'],
                 image_urls=get_car_images_from_url(
-                    f"https://najlepszeoferty.bmw.pl/uzywane/wyszukaj/opis-szczegolowy/{o['id']}"
+                    f'https://najlepszeoferty.bmw.pl/uzywane/wyszukaj/opis-szczegolowy/{o["id"]}'
                 ),
                 dealer_id=o['dealer']['id'],
                 gross_sales_price=o['transactionalPrice'],
                 currency='PLN',
                 electrification_type=o['fuel']['label'],
-                url=f"https://najlepszeoferty.bmw.pl/uzywane/wyszukaj/opis-szczegolowy/{o['id']}",
+                url=f'https://najlepszeoferty.bmw.pl/uzywane/wyszukaj/opis-szczegolowy/{o["id"]}',
             )
             for o in offerings
         ]

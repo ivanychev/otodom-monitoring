@@ -144,7 +144,7 @@ class BmwSearchRequestBuilder(CarSearcher):
                 electrification_type=record['vehicle']['vehicleSpecification'][
                     'technicalAndEmission'
                 ]['technicalData']['degreeOfElectrificationBasedFuelType'],
-                url=f"https://www.bmw.pl/pl-pl/sl/stocklocator#/details/{record['vehicle']['documentId']}",
+                url=f'https://www.bmw.pl/pl-pl/sl/stocklocator#/details/{record["vehicle"]["documentId"]}',
             )
             for record in resp.json()['hits']
         ]

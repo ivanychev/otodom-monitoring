@@ -305,15 +305,16 @@ def send_test_flat(bot_token: str, api_id: int, api_hash: str):
 def parse_flats_gen():
     conn = sqlite3.connect('/Users/iv/Downloads/flats-2.db')
     cursor = conn.cursor()
-    result = cursor.execute('''
+    result = cursor.execute("""
         SELECT url
         FROM flats
-        WHERE filter_name = 'commercial_all_mokotow' ''')
+        WHERE filter_name = 'commercial_all_mokotow' """)
     urls = [r[0] for r in result.fetchall()]
     for url in tqdm(urls):
         flat = parse_flat_page(url)
         if flat:
             yield flat
+
 
 if __name__ == '__main__':
     cli()

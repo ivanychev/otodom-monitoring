@@ -20,6 +20,16 @@ def _make_tz_aware(dt: datetime) -> datetime:
     return dt.replace(tzinfo=tz)
 
 
+def _parse_dt(dt: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(dt)
+    except ValueError as e:
+        # Handle weird `1999-02-29 00:00:01` dates.
+        if 'day is out of range for month' in str(e):
+            return None
+        raise e
+
+
 def _extract_image_url(item: dict) -> str | None:
     if not item.get('images'):
         return None
@@ -62,7 +72,7 @@ class OtodomFlatsPageParser:
         data = self.soup.find_all(attrs={'id': '__NEXT_DATA__'})
         if not data:
             raise RuntimeError(
-                f"Failed to fetch data from from html: base64 {base64.b64encode(self.html.encode('utf8'))}"
+                f'Failed to fetch data from from html: base64 {base64.b64encode(self.html.encode("utf8"))}'
             )
         payload: dict = json.loads(data[0].text)
         data = payload['props']['pageProps']['data']
@@ -83,22 +93,25 @@ class OtodomFlatsPageParser:
             ),
             key=itemgetter('id'),
         )
-        return [
-            Flat(
-                url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
-                found_ts=self.now,
-                title=item['title'],
-                picture_url=_extract_image_url(item),
-                summary_location=_get_item_summary_location(item),
-                price=int(item['totalPrice']['value']),
-                created_dt=_make_tz_aware(datetime.fromisoformat(item['dateCreated'])),
-                pushed_up_dt=datetime.fromisoformat(item['pushedUpAt'])
-                if item['pushedUpAt']
-                else None,
+        flats = []
+        for item in items:
+            if not self.filter.matches_filter(item):
+                continue
+            flats.append(
+                Flat(
+                    url=f'https://www.otodom.pl/pl/oferta/{item["slug"]}',
+                    found_ts=self.now,
+                    title=item['title'],
+                    picture_url=_extract_image_url(item),
+                    summary_location=_get_item_summary_location(item),
+                    price=int(item['totalPrice']['value']),
+                    created_dt=_make_tz_aware(dt)
+                    if (dt := _parse_dt(item['dateCreated']))
+                    else None,
+                    pushed_up_dt=_parse_dt(item['pushedUpAt']) if item['pushedUpAt'] else None,
+                )
             )
-            for item in items
-            if self.filter.matches_filter(item)
-        ]
+        return flats
 
 
 def _get_item_summary_location(item: dict) -> str:

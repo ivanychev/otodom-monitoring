@@ -195,13 +195,7 @@ FILTERS = {
     #     .in_mokotow()
     #     .in_ochota()
     # ),
-    'sm': (
-        EstateFilter('sm')
-        .rent_a_flat()
-        .with_max_price(8000)
-        .in_mokotow()
-        .with_min_area(60)
-    )
+    'sm': (EstateFilter('sm').rent_a_flat().with_max_price(8000).in_mokotow().with_min_area(80))
 }
 
 assert all(f.name == name for name, f in FILTERS.items())
