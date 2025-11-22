@@ -4,7 +4,7 @@ set -euxo pipefail
 export DOCKER_BUILDKIT=1
 
 docker_image=ivanychev/otodom
-docker_tag=0.63-test3
+docker_tag=0.64.1
 
 
 docker build . --provenance=false -f Dockerfile --platform=linux/amd64 -t "${docker_image}:${docker_tag}-amd64"
